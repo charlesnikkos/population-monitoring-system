@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+{% block title %}Accounts{% endblock %}
+
+{% block content %}
+<style>
+    .page-header {
+        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 16px;
+        margin-bottom: 2rem;
+        box-shadow: 0 8px 24px rgba(30, 60, 114, 0.2);
+        transition: background 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    body.dark-mode .page-header {
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+    }
+    
+    .account-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.05);
+        overflow: hidden;
+        border: none;
+        transition: background 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    body.dark-mode .account-card {
+        background: #1e1e1e;
+        color: #e0e0e0;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+    }
+    
+    .table th {
+        background: #f8f9fa;
+        color: #495057;
+        font-weight: 600;
+        border-bottom: 2px solid #e9ecef;
+        transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+    }
+
+    body.dark-mode .table th {
+        background: #2c3e50;
+        color: #e0e0e0;
+        border-bottom-color: #444;
+    }
+    
+    .table td {
+        vertical-align: middle;
+        color: #2c3e50;
+        transition: color 0.3s ease;
+    }
+
+    body.dark-mode .table td {
+        color: #e0e0e0;
+        border-color: #333;
+    }
+    
+    .role-badge {
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+    .badge-admin {
+        background: #ffeaa7;
+        color: #d63031;
+    }
+    .badge-staff {
+        background: #81ecec;
+        color: #00b894;
+    }
+
+    body.dark-mode .badge-admin {
+        background: #704214;
+        color: #ffd699;
+    }
+
+    body.dark-mode .badge-staff {
+        background: #0c5a4e;
+        color: #7efef5;
+    }
+    
+    .btn-add {
+        background: white;
+        color: #2a5298;
+        font-weight: 600;
+        border: none;
+        transition: background 0.3s ease, color 0.3s ease;
+    }
+
+    body.dark-mode .btn-add {
+        background: #667eea;
+        color: white;
+    }
+
+    .btn-add:hover {
+        background: #f1f5f9;
+    }
+
+    body.dark-mode .btn-add:hover {
+        background: #8b9bef;
+    }
+</style>
+
+<!-- Header -->
+<div class="page-header">
+    <div class="row align-items-center">
+        <div class="col">
+            <h2 class="fw-bold mb-2"> Manage Accounts</h2>
+            <p class="mb-0 opacity-75">Create and manage user access to the system</p>
+        </div>
+        <div class="col-auto">
+            {% if session.role == 'admin' %}
+            <a href="/add_account" class="btn btn-light fw-bold px-3">
+                <i class="bi bi-person-plus-fill me-2"></i>Add New Account
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Table Card -->
+<div class="account-card">
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>Username</th>
+                    <th>Role</th>
+                    <th>Access Level</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr>
+                    <td class="fw-bold">
+                        <i class="bi bi-person-circle text-primary me-2"></i>{{ user.username }}
+                    </td>
+                    <td>
+                        {% if user.role == 'admin' %}
+                            <span class="role-badge badge-admin">👑 Admin</span>
+                        {% else %}
+                            <span class="role-badge badge-staff">📋 Staff</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-muted small">
+                        {% if user.role == 'admin' %}
+                            Full System Access
+                        {% else %}
+                            Limited Access
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{{ url_for('edit_account', user_id=user.id) }}" class="btn btn-sm btn-outline-primary">
+                            Edit
+                        </a>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="4" class="text-center py-4 text-muted">No accounts found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

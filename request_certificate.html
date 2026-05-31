@@ -1,0 +1,213 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    .citizen-search-container {
+        position: relative;
+        margin-bottom: 1rem;
+    }
+    .citizen-search {
+        width: 100%;
+        padding: 0.75rem;
+        border: 2px solid #ddd;
+        border-radius: 6px;
+        font-size: 0.95rem;
+        transition: border-color 0.2s;
+    }
+    .citizen-search:focus {
+        outline: none;
+        border-color: #3498db;
+        box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+    }
+    .citizen-list {
+        max-height: 300px;
+        overflow-y: auto;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: white;
+        z-index: 1000;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        margin-top: 0.5rem;
+    }
+    .citizen-list.show {
+        display: block;
+    }
+    .citizen-item {
+        padding: 0.75rem 1rem;
+        cursor: pointer;
+        border-bottom: 1px solid #f0f0f0;
+        transition: background 0.2s;
+    }
+    .citizen-item:hover {
+        background: #f0f6ff;
+    }
+    .citizen-item.selected {
+        background: #e3f2fd;
+        font-weight: 600;
+    }
+    .citizen-item-name {
+        font-weight: 600;
+        color: #2c3e50;
+    }
+    .citizen-item-purok {
+        font-size: 0.85rem;
+        color: #666;
+    }
+</style>
+
+<div class="page-header mt-4">
+    <h2>Request: {{ title }}</h2>
+    <p class="text-muted">Fill out the form below to create a new request.</p>
+</div>
+
+<div class="card mt-3">
+    <div class="card-body">
+        <form method="post">
+            <div class="form-group mb-3">
+                <label for="citizen_search">Search & Select Citizen</label>
+                <div class="citizen-search-container">
+                    <input 
+                        type="text" 
+                        class="citizen-search" 
+                        id="citizen_search" 
+                        placeholder="Type citizen name to search..."
+                        autocomplete="off">
+                    <div class="citizen-list" id="citizen_list"></div>
+                </div>
+                <select class="form-control" id="citizen_id" name="citizen_id" required style="display: none;">
+                    <option value="">-- Choose citizen --</option>
+                    {% for c in citizens %}
+                    <option value="{{ c.id }}">{{ c.fullname }} — {{ c.purok }}</option>
+                    {% endfor %}
+                </select>
+                <div id="selected_citizen" class="alert alert-info mt-2" style="display: none; margin-bottom: 0;">
+                    Selected: <strong id="selected_name"></strong>
+                </div>
+            </div>
+
+            {% if title == 'Ayuda Assistance' %}
+            <div class="form-group mb-3">
+                <label for="ayuda_type">Ayuda Type</label>
+                <select class="form-control" id="ayuda_type" name="ayuda_type" required>
+                    <option value="Cash Assistance">Cash Assistance</option>
+                    <option value="Food Assistance">Food Assistance</option>
+                    <option value="Medical Assistance">Medical Assistance</option>
+                    <option value="Educational Assistance">Educational Assistance</option>
+                    <option value="Disaster Relief">Disaster Relief</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+            <div class="form-group mb-3">
+                <label for="amount">Amount (₱)</label>
+                <input type="number" id="amount" name="amount" class="form-control" step="0.01" placeholder="0.00" required>
+            </div>
+            {% elif title == 'Barangay Clearance' or title == 'Certificate of Indigency' %}
+            <div class="form-group mb-3">
+                <label for="reason">Reason</label>
+                <input type="text" class="form-control" id="reason" name="reason" placeholder="Enter reason for request" required>
+            </div>
+            {% else %}
+            <div class="form-group mb-3">
+                <label for="purpose">Purpose / Notes</label>
+                <textarea class="form-control" id="purpose" name="purpose" rows="3"></textarea>
+            </div>
+            {% endif %}
+
+            <div class="form-group mb-3">
+                <label for="date_requested">Date Requested</label>
+                <input type="date" id="date_requested" name="date_requested" class="form-control" value="{{ today }}" required>
+            </div>
+
+            <div class="d-flex justify-content-between">
+                <a class="btn btn-secondary" href="{{ url_for('certificates') }}">Back</a>
+                <button class="btn btn-primary" type="submit">Create Request</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('citizen_search');
+    const citizenList = document.getElementById('citizen_list');
+    const citizenSelect = document.getElementById('citizen_id');
+    const selectedCitizenDiv = document.getElementById('selected_citizen');
+    const selectedNameSpan = document.getElementById('selected_name');
+    
+    const citizens = [
+        {% for c in citizens %}
+        { id: {{ c.id }}, fullname: '{{ c.fullname }}', purok: '{{ c.purok }}' },
+        {% endfor %}
+    ];
+    
+    function renderList(filteredCitizens) {
+        citizenList.innerHTML = '';
+        if (filteredCitizens.length === 0) {
+            citizenList.innerHTML = '<div class="citizen-item" style="color: #999;">No citizens found</div>';
+            return;
+        }
+        filteredCitizens.forEach(citizen => {
+            const div = document.createElement('div');
+            div.className = 'citizen-item';
+            if (citizenSelect.value == citizen.id) {
+                div.classList.add('selected');
+            }
+            div.innerHTML = `
+                <div class="citizen-item-name">${citizen.fullname}</div>
+                <div class="citizen-item-purok">Purok: ${citizen.purok}</div>
+            `;
+            div.addEventListener('click', function() {
+                citizenSelect.value = citizen.id;
+                searchInput.value = citizen.fullname;
+                selectedNameSpan.textContent = `${citizen.fullname} (${citizen.purok})`;
+                selectedCitizenDiv.style.display = 'block';
+                citizenList.classList.remove('show');
+            });
+            citizenList.appendChild(div);
+        });
+    }
+    
+    searchInput.addEventListener('focus', function() {
+        if (searchInput.value.length > 0 || citizens.length > 0) {
+            citizenList.classList.add('show');
+            const filtered = citizens.filter(c => 
+                c.fullname.toLowerCase().includes(searchInput.value.toLowerCase())
+            );
+            renderList(filtered);
+        }
+    });
+    
+    searchInput.addEventListener('input', function() {
+        const query = searchInput.value.toLowerCase();
+        const filtered = citizens.filter(c => 
+            c.fullname.toLowerCase().includes(query) || 
+            c.purok.toLowerCase().includes(query)
+        );
+        citizenList.classList.add('show');
+        renderList(filtered);
+    });
+    
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.citizen-search-container')) {
+            citizenList.classList.remove('show');
+        }
+    });
+    
+    // Show selected citizen if already selected
+    if (citizenSelect.value) {
+        const selected = citizens.find(c => c.id == citizenSelect.value);
+        if (selected) {
+            searchInput.value = selected.fullname;
+            selectedNameSpan.textContent = `${selected.fullname} (${selected.purok})`;
+            selectedCitizenDiv.style.display = 'block';
+        }
+    }
+});
+</script>
+
+{% endblock %}

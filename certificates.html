@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+{% block title %}Certificate Center{% endblock %}
+
+{% block content %}
+<style>
+    .cert-header {
+        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 16px;
+        margin-bottom: 2rem;
+        box-shadow: 0 8px 24px rgba(30, 60, 114, 0.2);
+        transition: background 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    body.dark-mode .cert-header {
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+    }
+
+    .cert-card {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        transition: transform 0.2s, box-shadow 0.2s, background 0.3s ease, color 0.3s ease;
+        border: none;
+        height: 100%;
+        text-align: center;
+    }
+
+    body.dark-mode .cert-card {
+        background: #1e1e1e;
+        color: #e0e0e0;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    }
+
+    .cert-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    }
+
+    body.dark-mode .cert-card:hover {
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
+    }
+
+    .cert-icon {
+        width: 70px;
+        height: 70px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        margin: 0 auto 1rem;
+        color: white;
+    }
+
+    .cert-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        color: #2c3e50;
+        transition: color 0.3s ease;
+    }
+
+    body.dark-mode .cert-title {
+        color: #e0e0e0;
+    }
+
+    .cert-desc {
+        font-size: 0.9rem;
+        color: #6c757d;
+        margin-bottom: 1rem;
+        transition: color 0.3s ease;
+    }
+
+    body.dark-mode .cert-desc {
+        color: #999;
+    }
+
+    .btn-request {
+        padding: 8px 20px;
+        border-radius: 8px;
+        font-weight: 600;
+    }
+</style>
+
+<!-- Header -->
+<div class="cert-header">
+    <div class="row align-items-center">
+        <div class="col">
+            <h2 class="fw-bold mb-2">📄 Certificate Center</h2>
+            <p class="mb-0 opacity-75">Request and manage various barangay certificates</p>
+        </div>
+    </div>
+</div>
+
+<!-- Certificate Types Grid -->
+<div class="row g-3 mb-4">
+    {% for cert in certificates %}
+    <div class="col-sm-6 col-lg-4 col-xl-3">
+        <div class="cert-card">
+            <div class="cert-icon" style="background: linear-gradient(135deg, {% if loop.index % 3 == 1 %}#3498db, #2980b9{% elif loop.index % 3 == 2 %}#2ecc71, #27ae60{% else %}#e74c3c, #c0392b{% endif %});">
+                {% if cert.icon %}
+                    <i class="bi {{ cert.icon }}"></i>
+                {% else %}
+                    📋
+                {% endif %}
+            </div>
+            <h5 class="cert-title">{{ cert.title }}</h5>
+            <p class="cert-desc">{{ cert.description }}</p>
+            <a href="{{ cert.link if cert.link is defined else url_for('request_certificate', cert_slug=cert.slug) }}" class="btn btn-primary btn-request">
+                <i class="bi bi-plus-circle me-1"></i> Request
+            </a>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Quick Stats -->
+<div class="row g-3 mt-4">
+    <div class="col-md-4">
+        <div class="card bg-primary bg-opacity-10 border-0 rounded-3 p-3 text-center">
+            <h3 class="text-primary mb-0">{{ certificates|length }}</h3>
+            <small class="text-muted">Available Certificates</small>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <a href="{{ url_for('certificate_requests') }}" class="text-decoration-none">
+            <div class="card bg-warning bg-opacity-10 border-0 rounded-3 p-3 text-center cursor-pointer" style="transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='none'">
+                <h3 class="text-warning mb-0">{{ pending_count }}</h3>
+                <small class="text-muted">Pending Requests</small>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-4">
+        <a href="{{ url_for('certificate_requests') }}" class="text-decoration-none">
+            <div class="card bg-success bg-opacity-10 border-0 rounded-3 p-3 text-center cursor-pointer" style="transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='none'">
+                <h3 class="text-success mb-0">{{ approved_count + released_count }}</h3>
+                <small class="text-muted">Approved/Released</small>
+            </div>
+        </a>
+    </div>
+</div>
+
+<div class="mt-4">
+    <a href="{{ url_for('certificate_requests') }}" class="btn btn-primary btn-lg">
+        <i class="bi bi-list-check"></i> View All Requests
+    </a>
+</div>
+{% endblock %}

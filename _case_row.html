@@ -1,0 +1,8 @@
+<div class="case-row">
+    <div>
+        <strong>{{ case.title }}</strong>
+        {% if case.article %}<div class="text-muted">{{ case.article }}</div>{% endif %}
+        {% if case.notes %}<div class="mt-1">{{ case.notes }}</div>{% endif %}
+    </div>
+    <div class="text-muted">{{ case.date_added }}</div>
+</div>

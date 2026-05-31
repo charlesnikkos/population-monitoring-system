@@ -1,0 +1,199 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    .page-header {
+        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 16px;
+        margin-bottom: 2rem;
+        box-shadow: 0 8px 24px rgba(30, 60, 114, 0.2);
+        transition: background 0.3s ease;
+    }
+
+    body.dark-mode .page-header {
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    }
+
+    .form-section {
+        background: white;
+        border-radius: 12px;
+        padding: 2rem;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.05);
+        transition: background 0.3s ease, color 0.3s ease;
+    }
+
+    body.dark-mode .form-section {
+        background: #1e1e1e;
+        color: #e0e0e0;
+    }
+
+    .form-label {
+        font-weight: 600;
+        transition: color 0.3s ease;
+    }
+
+    body.dark-mode .form-label {
+        color: #e0e0e0;
+    }
+
+    .form-control, .form-select {
+        transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+    }
+
+    body.dark-mode .form-control, body.dark-mode .form-select {
+        background-color: #2c3e50;
+        color: #e0e0e0;
+        border-color: #444;
+    }
+
+    body.dark-mode .form-control:focus, body.dark-mode .form-select:focus {
+        background-color: #333;
+        color: #e0e0e0;
+        border-color: #667eea;
+    }
+
+    .btn {
+        transition: all 0.3s ease;
+    }
+
+    body.dark-mode .btn-secondary {
+        background-color: #667eea;
+        border-color: #667eea;
+    }
+
+    body.dark-mode .btn-secondary:hover {
+        background-color: #8b9bef;
+        border-color: #8b9bef;
+    }
+
+    body.dark-mode .btn-primary {
+        background-color: #667eea;
+        border-color: #667eea;
+    }
+
+    body.dark-mode .btn-primary:hover {
+        background-color: #8b9bef;
+        border-color: #8b9bef;
+    }
+
+    .text-muted {
+        transition: color 0.3s ease;
+    }
+
+    body.dark-mode .text-muted {
+        color: #999 !important;
+    }
+
+    textarea.form-control {
+        transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+    }
+
+    body.dark-mode textarea.form-control {
+        background-color: #2c3e50;
+        color: #e0e0e0;
+        border-color: #444;
+    }
+
+    .field-list {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin: 1.5rem 0;
+        transition: background 0.3s ease;
+    }
+
+    body.dark-mode .field-list {
+        background: #2c3e50;
+    }
+
+    .field-list h5 {
+        margin-bottom: 1rem;
+        color: #2c3e50;
+        transition: color 0.3s ease;
+    }
+
+    body.dark-mode .field-list h5 {
+        color: #e0e0e0;
+    }
+
+    .field-list ul {
+        margin: 0;
+        padding-left: 1.5rem;
+    }
+
+    .field-list li {
+        margin-bottom: 0.5rem;
+        color: #495057;
+        transition: color 0.3s ease;
+    }
+
+    body.dark-mode .field-list li {
+        color: #b0b0b0;
+    }
+
+    .required-badge {
+        background: #e74c3c;
+        color: white;
+        padding: 2px 6px;
+        border-radius: 3px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        margin-left: 0.25rem;
+    }
+</style>
+
+<div class="page-header">
+    <h2>Upload Citizens from Excel or CSV</h2>
+    <p class="text-muted">Select a file with the following headers. Fields marked with <span class="required-badge">Required</span> must be present.</p>
+</div>
+
+<div class="form-section">
+    <div class="mb-4">
+        <a href="{{ url_for('download_upload_template') }}" class="btn btn-secondary">
+            <i class="bi bi-download"></i> Download Upload Template
+        </a>
+    </div>
+
+    <div class="field-list">
+        <h5>📋 Required and Optional Fields:</h5>
+        <ul>
+            <li><strong>Name</strong> <span class="required-badge">Required</span> - Full name of citizen (Aliases: Full Name, FullName)</li>
+            <li><strong>Birthdate</strong> - Birth date in format YYYY-MM-DD (Aliases: Date of Birth, DOB)</li>
+            <li><strong>Gender</strong> <span class="required-badge">Required</span> - Male/Female</li>
+            <li><strong>Age</strong> <span class="required-badge">Required</span> - Age as number</li>
+            <li><strong>Address</strong> - Complete address</li>
+            <li><strong>Status</strong> - Civil status (Single, Married, Widowed, Separated)</li>
+            <li><strong>Purok</strong> - Purok or Zone (Aliases: Zone, Barangay)</li>
+            <li><strong>Nationality</strong> - Country of citizenship</li>
+            <li><strong>Contact Number</strong> - Phone number (Aliases: Phone, Telephone)</li>
+            <li><strong>Email Address</strong> - Email (Aliases: Email)</li>
+            <li><strong>Place of Birth</strong> - Birthplace (Aliases: Birthplace, POB)</li>
+        </ul>
+    </div>
+
+    <form method="POST" enctype="multipart/form-data">
+        <div class="mb-3">
+            <label class="form-label">Choose file</label>
+            <input type="file" name="file" class="form-control" accept=".xlsx,.xls,.csv" required>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">File instructions</label>
+            <textarea class="form-control" rows="6" readonly>
+✓ Use .xlsx, .xls, or .csv formats.
+✓ First row should contain headers (column names).
+✓ Name, Gender, and Age are REQUIRED fields.
+✓ You may use alternate header names for flexibility (e.g., "Full Name" instead of "Name").
+✓ Download the template first, fill in your data, then upload.
+✓ Example: Name | Birthdate | Gender | Age | Address | Status | Purok | Nationality | Contact Number | Email Address | Place of Birth
+            </textarea>
+        </div>
+
+        <button class="btn btn-primary btn-lg">
+            <i class="bi bi-cloud-arrow-up"></i> Upload and Import
+        </button>
+    </form>
+</div>
+{% endblock %}

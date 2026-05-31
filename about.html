@@ -1,0 +1,717 @@
+{% extends "base.html" %}
+{% block title %}About Brgy. Taft{% endblock %}
+
+{% block content %}
+<style>
+  :root {
+    --primary-blue: #1e3c72;
+    --secondary-blue: #2a5298;
+    --gold-accent: #f59e0b;
+    --light-blue: #e3f2fd;
+    --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  }
+
+  /* DARK MODE GLOBAL */
+  body.dark-mode {
+    --light-blue: #2c3e50;
+    --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  }
+
+  body.dark-mode .hero-section,
+  body.dark-mode .section-header,
+  body.dark-mode .captain-card,
+  body.dark-mode .council-card,
+  body.dark-mode .staff-item,
+  body.dark-mode .info-card,
+  body.dark-mode .contact-box {
+    color: #e0e0e0;
+  }
+
+  body.dark-mode .hero-section {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0d1a2b 100%);
+  }
+
+  body.dark-mode .section-header {
+    background: #2c3e50;
+    border-left-color: var(--gold-accent);
+  }
+
+  body.dark-mode .section-header h2,
+  body.dark-mode .section-header p {
+    color: #e0e0e0;
+  }
+
+  body.dark-mode .captain-card,
+  body.dark-mode .council-card,
+  body.dark-mode .staff-item,
+  body.dark-mode .info-card {
+    background: #1e1e1e;
+    border-color: #333;
+    color: #e0e0e0;
+  }
+
+  body.dark-mode h2,
+  body.dark-mode h3,
+  body.dark-mode h4,
+  body.dark-mode h5,
+  body.dark-mode h6 {
+    color: #e0e0e0;
+  }
+
+  body.dark-mode .text-muted {
+    color: #999 !important;
+  }
+
+  body.dark-mode .contact-box {
+    background: #1e1e1e;
+    color: #e0e0e0;
+    border: 1px solid #333;
+  }
+
+  body.dark-mode .btn-dashboard {
+    background: #667eea;
+    color: white;
+  }
+
+  body.dark-mode .btn-dashboard:hover {
+    background: #8b9bef;
+    color: white;
+  }
+
+  /* Hero Section */
+  .hero-section {
+    background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #3498db 100%);
+    color: white;
+    padding: 4rem 2rem;
+    text-align: center;
+    border-radius: 20px;
+    margin-bottom: 3rem;
+    box-shadow: 0 8px 30px rgba(30, 60, 114, 0.3);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-section::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="2"/></svg>');
+    background-size: 100px 100px;
+    opacity: 0.3;
+  }
+
+  .hero-title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    margin-bottom: 1rem;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    position: relative;
+    z-index: 1;
+  }
+
+  .hero-subtitle {
+    font-size: 1.1rem;
+    opacity: 0.95;
+    max-width: 600px;
+    margin: 0 auto 2rem;
+    position: relative;
+    z-index: 1;
+  }
+
+  .btn-dashboard {
+    background: white;
+    color: var(--primary-blue);
+    padding: 12px 30px;
+    border-radius: 25px;
+    font-weight: 700;
+    text-decoration: none;
+    display: inline-block;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    transition: all 0.3s ease;
+    position: relative;
+    z-index: 1;
+  }
+
+  .btn-dashboard:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+    color: var(--secondary-blue);
+  }
+
+  /* Section Headers */
+  .section-header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+    padding: 1rem;
+    background: var(--light-blue);
+    border-radius: 15px;
+    border-left: 5px solid var(--gold-accent);
+  }
+
+  .section-header h2 {
+    font-weight: 700;
+    color: var(--primary-blue);
+    margin-bottom: 0.5rem;
+  }
+
+  .section-header p {
+    color: #666;
+    margin: 0;
+  }
+
+  /* Captain Card */
+  .captain-section {
+    margin-bottom: 4rem;
+  }
+
+  .captain-card {
+    background: white;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: var(--card-shadow);
+    text-align: center;
+    max-width: 600px;
+    margin: 0 auto;
+    border: 4px solid var(--gold-accent);
+    transition: transform 0.3s ease;
+  }
+
+  .captain-card:hover {
+    transform: translateY(-10px);
+  }
+
+  .captain-header {
+    background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+    padding: 2rem 1rem;
+    position: relative;
+  }
+
+  .captain-photo {
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 5px solid var(--gold-accent);
+    margin: 0 auto 1rem;
+    display: block;
+    background: #f0f0f0;
+  }
+
+  .captain-badge {
+    background: var(--gold-accent);
+    color: white;
+    padding: 8px 25px;
+    border-radius: 25px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    display: inline-block;
+    margin-top: 0.5rem;
+    box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
+  }
+
+  .captain-name {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: var(--primary-blue);
+    margin: 1rem 0 0.5rem;
+  }
+
+  .captain-role {
+    color: #666;
+    font-size: 1rem;
+    font-weight: 600;
+  }
+
+  /* Council Grid */
+  .council-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+  }
+
+  .council-card {
+    background: white;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    text-align: center;
+    transition: all 0.3s ease;
+    border: 2px solid #f0f0f0;
+  }
+
+  .council-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    border-color: var(--secondary-blue);
+  }
+
+  .council-photo {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .council-info {
+    padding: 1.2rem;
+  }
+
+  .council-name {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--primary-blue);
+    margin-bottom: 0.4rem;
+    line-height: 1.3;
+  }
+
+  .council-committee {
+    font-size: 0.8rem;
+    color: #666;
+    background: var(--light-blue);
+    padding: 5px 10px;
+    border-radius: 6px;
+    display: inline-block;
+    font-weight: 500;
+  }
+
+  /* Staff Section */
+  .staff-section {
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    padding: 2rem;
+    border-radius: 20px;
+    margin: 3rem 0;
+  }
+
+  .staff-list {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    flex-wrap: wrap;
+  }
+
+  .staff-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    text-align: center;
+    width: 220px;
+    transition: transform 0.3s ease;
+  }
+
+  .staff-card:hover {
+    transform: translateY(-5px);
+  }
+
+  .staff-photo {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin: 0 auto 1rem;
+    display: block;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+  }
+
+  .staff-name {
+    font-weight: 700;
+    color: var(--primary-blue);
+    margin-bottom: 0.3rem;
+    font-size: 0.95rem;
+  }
+
+  .staff-role {
+    color: #666;
+    font-size: 0.85rem;
+  }
+
+  /* Contact Section */
+  .contact-section {
+    margin-top: 4rem;
+    padding: 3rem 2rem;
+    background: white;
+    border-radius: 20px;
+    box-shadow: var(--card-shadow);
+  }
+
+  .contact-box {
+    background: linear-gradient(135deg, var(--light-blue) 0%, #bbdefb 100%);
+    border-radius: 16px;
+    padding: 2.5rem;
+    height: 100%;
+    border: 2px solid var(--secondary-blue);
+  }
+
+  .contact-item {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background: white;
+    border-radius: 10px;
+    transition: transform 0.2s ease;
+  }
+
+  .contact-item:hover {
+    transform: translateX(5px);
+  }
+
+  .contact-icon {
+    margin-right: 1rem;
+    color: var(--secondary-blue);
+    font-size: 1.5rem;
+    min-width: 30px;
+  }
+
+  .map-container {
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    height: 100%;
+    min-height: 450px;
+    border: 3px solid var(--secondary-blue);
+  }
+
+  .info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+  }
+
+  .info-card {
+    background: white;
+    padding: 2rem;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    text-align: center;
+    transition: all 0.3s ease;
+    border-top: 4px solid var(--secondary-blue);
+  }
+
+  .info-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+  }
+
+  .info-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+  }
+
+  .fb-button {
+    background: #1877f2;
+    color: white;
+    padding: 12px 20px;
+    border-radius: 10px;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    width: 100%;
+  }
+
+  .fb-button:hover {
+    background: #166fe5;
+    transform: translateY(-2px);
+    color: white;
+  }
+
+  .image-placeholder {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+    color: white;
+  }
+</style>
+
+<!-- HERO BANNER -->
+<div class="hero-section">
+  <h1 class="hero-title">🏛️ Barangay Taft - Surigao City</h1>
+  <p class="hero-subtitle">A modern, transparent, and citizen-first community management system dedicated to serving our people with excellence.</p>
+  <a href="/dashboard" class="btn-dashboard">← Back to Dashboard</a>
+</div>
+
+<div class="container pb-5">
+
+  <!-- MISSION & VISION -->
+  <div class="section-header">
+    <h2>📋 Our Mission & Vision</h2>
+    <p>Guiding principles that shape our community services</p>
+  </div>
+  
+  <div class="info-grid">
+    <div class="info-card">
+      <div class="info-icon">🎯</div>
+      <h3>Our Mission</h3>
+      <p>To deliver efficient, transparent, and accessible public services while fostering unity, safety, and progress for every resident of Barangay Taft.</p>
+    </div>
+    <div class="info-card">
+      <div class="info-icon">👁️</div>
+      <h3>Our Vision</h3>
+      <p>A digitally empowered, inclusive, and thriving barangay where every citizen's needs are met with dignity and innovation.</p>
+    </div>
+    <div class="info-card">
+      <div class="info-icon">💎</div>
+      <h3>Core Values</h3>
+      <p>Transparency • Accountability • Compassion • Innovation • Community-Driven Service</p>
+    </div>
+  </div>
+
+  <!-- LEADERSHIP SECTION -->
+  <div class="section-header">
+    <h2>👔 Barangay Leadership</h2>
+    <p>Meet our dedicated public servants</p>
+  </div>
+
+  <!-- PUNONG BARANGAY -->
+  <div class="captain-section">
+    <div class="captain-card">
+      <div class="captain-header">
+        {% if officials.captain %}
+          <img src="{{ get_photo_url(officials.captain) }}" 
+               class="captain-photo" 
+               alt="{{ officials.captain.fullname }}"
+               onerror="this.onerror=null; this.src='{{ url_for('static', filename='default-avatar.png') }}'; this.parentElement.querySelector('.placeholder-fallback').style.display='flex'; this.style.display='none';">
+          <div class="placeholder-fallback" style="display: none; width:180px; height:180px; border-radius:50%; background:linear-gradient(135deg,#667eea,#764ba2); align-items:center; justify-content:center; font-size:4rem; color:white; margin:0 auto 1rem; border:5px solid var(--gold-accent);">👤</div>
+        {% else %}
+          <img src="{{ url_for('static', filename='Mario_Gesta.jpg') }}" 
+               class="captain-photo" 
+               alt="HON. MARIO I. GESTA"
+               onerror="this.onerror=null; this.src='{{ url_for('static', filename='default-avatar.png') }}'; this.parentElement.querySelector('.placeholder-fallback').style.display='flex'; this.style.display='none';">
+        {% endif %}
+        <div class="captain-badge">⭐ Punong Barangay ⭐</div>
+      </div>
+      <div style="padding: 2rem;">
+        <h3 class="captain-name">HON. MARIO I. GESTA</h3>
+        <p class="captain-role">Barangay Captain</p>
+        <p style="color: var(--secondary-blue); font-weight: 600; margin-top: 0.5rem;">Punong Barangay</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- KAGAWADS -->
+  <h4 style="text-align: center; color: var(--primary-blue); margin-bottom: 2rem; font-weight: 700;">SANGGUNIANG BARANGAY MEMBERS</h4>
+  
+  <div class="council-grid">
+    <!-- Kagawad 1 -->
+    <div class="council-card">
+      <img src="{{ url_for('static', filename='Pablo_Bonono.jpg') }}" 
+           class="council-photo"
+           alt="Hon. Pablo Bonono"
+           onerror="this.onerror=null; this.src='{{ url_for('static', filename='default-avatar.png') }}'; this.className='council-photo image-placeholder'; this.alt='No Image';">
+      <div class="council-info">
+        <div class="council-name">HON. PABLO A. BONONO, JR.</div>
+        <div class="council-committee">Finance & Infrastructure</div>
+      </div>
+    </div>
+    
+    <!-- Kagawad 2 -->
+    <div class="council-card">
+      <img src="{{ url_for('static', filename='Ellen_Balo.jpg') }}" 
+           class="council-photo"
+           alt="Hon. Ellen Balo"
+           onerror="this.onerror=null; this.src='{{ url_for('static', filename='default-avatar.png') }}'; this.className='council-photo image-placeholder';">
+      <div class="council-info">
+        <div class="council-name">HON. ELLEN KIM D. BALO</div>
+        <div class="council-committee">Women & Livelihood</div>
+      </div>
+    </div>
+    
+    <!-- Kagawad 3 -->
+    <div class="council-card">
+      <img src="{{ url_for('static', filename='Christian_Alvarez.jpg') }}" 
+           class="council-photo"
+           alt="Hon. Christian Alvarez"
+           onerror="this.onerror=null; this.src='{{ url_for('static', filename='default-avatar.png') }}'; this.className='council-photo image-placeholder';">
+      <div class="council-info">
+        <div class="council-name">HON. CHRISTIAN MARK R. ALVAREZ</div>
+        <div class="council-committee">Tourism Committee</div>
+      </div>
+    </div>
+    
+    <!-- Kagawad 4 -->
+    <div class="council-card">
+      <img src="{{ url_for('static', filename='Felipe_Go.jpg') }}" 
+           class="council-photo"
+           alt="Hon. Felipe Go"
+           onerror="this.onerror=null; this.src='{{ url_for('static', filename='default-avatar.png') }}'; this.className='council-photo image-placeholder';">
+      <div class="council-info">
+        <div class="council-name">HON. FELIPE Y. GO</div>
+        <div class="council-committee">Agriculture</div>
+      </div>
+    </div>
+    
+    <!-- Kagawad 5 -->
+    <div class="council-card">
+      <img src="{{ url_for('static', filename='Roberto_Parada.jpg') }}" 
+           class="council-photo"
+           alt="Hon. Roberto Parada"
+           onerror="this.onerror=null; this.src='{{ url_for('static', filename='default-avatar.png') }}'; this.className='council-photo image-placeholder';">
+      <div class="council-info">
+        <div class="council-name">HON. ROBERTO E. PARADA, JR.</div>
+        <div class="council-committee">Health & Education</div>
+      </div>
+    </div>
+    
+    <!-- Kagawad 6 -->
+    <div class="council-card">
+      <img src="{{ url_for('static', filename='Romeo_Boquilon.jpg') }}" 
+           class="council-photo"
+           alt="Hon. Romeo Boquilon"
+           onerror="this.onerror=null; this.src='{{ url_for('static', filename='default-avatar.png') }}'; this.className='council-photo image-placeholder';">
+      <div class="council-info">
+        <div class="council-name">HON. ROMEO C. BOQUILON</div>
+        <div class="council-committee">Environment</div>
+      </div>
+    </div>
+    
+    <!-- Kagawad 7 -->
+    <div class="council-card">
+      <img src="{{ url_for('static', filename='Joselito_Eviota.png') }}" 
+           class="council-photo"
+           alt="Hon. Joselito Eviota"
+           onerror="this.onerror=null; this.src='{{ url_for('static', filename='default-avatar.png') }}'; this.className='council-photo image-placeholder';">
+      <div class="council-info">
+        <div class="council-name">HON. JOSELITO J. EVIOTA</div>
+        <div class="council-committee">Peace & Order</div>
+      </div>
+    </div>
+    
+    <!-- SK Chairman -->
+    <div class="council-card">
+      <img src="{{ url_for('static', filename='Ureka_Tibay.jpg') }}" 
+           class="council-photo"
+           alt="Hon. Ureka Tibay"
+           onerror="this.onerror=null; this.src='{{ url_for('static', filename='default-avatar.png') }}'; this.className='council-photo image-placeholder';">
+      <div class="council-info">
+        <div class="council-name">HON. UREKA AMIRA S. TIBAY</div>
+        <div class="council-committee" style="background: #e8f4fd; color: var(--secondary-blue);">SK Chairman</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STAFF SECTION -->
+  <div class="staff-section">
+    <div class="section-header" style="margin-bottom: 2rem;">
+      <h2>💼 Barangay Staff</h2>
+    </div>
+    <div class="staff-list">
+      <div class="staff-card">
+        <img src="{{ url_for('static', filename='Gregy_Alvarado.jpg') }}" 
+             class="staff-photo"
+             alt="Ms. Gregy Alvarado"
+             onerror="this.onerror=null; this.src='{{ url_for('static', filename='default-avatar.png') }}'; this.className='staff-photo image-placeholder';">
+        <div class="staff-name">MS. GREGY D. ALVARADO</div>
+        <div class="staff-role">Barangay Secretary</div>
+      </div>
+      <div class="staff-card">
+        <img src="{{ url_for('static', filename='Annabelle_Martinez.jpg') }}" 
+             class="staff-photo"
+             alt="Ms. Annabelle Martinez"
+             onerror="this.onerror=null; this.src='{{ url_for('static', filename='default-avatar.png') }}'; this.className='staff-photo image-placeholder';">
+        <div class="staff-name">MS. ANNABELLE B. MARTINEZ</div>
+        <div class="staff-role">Barangay Treasurer</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTACT & MAP SECTION -->
+  <div class="contact-section">
+    <div class="section-header">
+      <h2>📍 Contact & Location</h2>
+      <p>Visit us at the Barangay Hall or connect with us online</p>
+    </div>
+    
+    <div class="row g-4 align-items-stretch">
+      <div class="col-lg-5">
+        <div class="contact-box">
+          <h4 style="color: var(--primary-blue); font-weight: 700; margin-bottom: 1.5rem;">📞 Contact Information</h4>
+          <div class="contact-item">
+            <span class="contact-icon">🏛️</span>
+            <div>
+              <strong style="color: var(--primary-blue);">Address</strong><br>
+              Barangay Hall, Navarro Street<br>
+              Barangay Taft, Surigao City<br>
+              Surigao del Norte
+            </div>
+          </div>
+          <div class="contact-item">
+            <span class="contact-icon">📍</span>
+            <div>
+              <strong style="color: var(--primary-blue);">Plus Code</strong><br>
+              QFMX+CCJ Surigao, Surigao del Norte
+            </div>
+          </div>
+          <div class="contact-item">
+            <span class="contact-icon">📞</span>
+            <div>
+              <strong style="color: var(--primary-blue);">Contact Number</strong><br>
+              (086) XXX-XXXX
+            </div>
+          </div>
+          <div class="contact-item">
+            <span class="contact-icon">📧</span>
+            <div>
+              <strong style="color: var(--primary-blue);">Email</strong><br>
+              brgy.taft.surigao@gov.ph
+            </div>
+          </div>
+          <div class="contact-item">
+            <span class="contact-icon">⏰</span>
+            <div>
+              <strong style="color: var(--primary-blue);">Office Hours</strong><br>
+              Monday - Friday: 8:00 AM - 5:00 PM
+            </div>
+          </div>
+          
+          <div class="mt-4 pt-3" style="border-top: 2px solid var(--light-blue);">
+            <h5 style="color: var(--primary-blue); font-weight: 700; margin-bottom: 1rem;">🌐 Follow Us On</h5>
+            <a href="https://www.facebook.com/profile.php?id=100060713221709" 
+               target="_blank" 
+               class="fb-button">
+              <span>📘</span>
+              <span>Barangay Taft Facebook Page</span>
+            </a>
+            <small class="text-muted d-block mt-2 text-center">Click to visit our official Facebook page</small>
+          </div>
+        </div>
+      </div>
+      
+      <div class="col-lg-7">
+        <div class="map-container">
+          <iframe 
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3861.734567890123!2d125.4985234!3d9.7834635!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x330136bf93853e87%3A0x7db296c91bb25b84!2sQFMX%2BCCJ%2C%20Navarro%20Street%2C%20Surigao%2C%20Surigao%20del%20Norte!5e0!3m2!1sen!2sph!4v1234567890123!5m2!1sen!2sph" 
+            width="100%" 
+            height="100%" 
+            style="border:0; min-height: 400px;" 
+            allowfullscreen="" 
+            loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade">
+          </iframe>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// Optional: Log image loading errors for debugging
+document.querySelectorAll('img').forEach(img => {
+    img.addEventListener('error', function(e) {
+        console.log('Failed to load image:', this.src);
+    });
+});
+</script>
+{% endblock %}

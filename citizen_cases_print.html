@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block title %}Cases for {{ citizen.fullname }}{% endblock %}
+
+{% block content %}
+<style>
+    @media print {
+        .no-print { display: none; }
+    }
+    .case-row { border-bottom: 1px solid #eee; padding: 12px 0; }
+    .header { display:flex; justify-content:space-between; align-items:center; }
+</style>
+
+<div class="mb-3 header">
+    <div>
+        <h3>Lupon Cases — {{ citizen.fullname }}</h3>
+        <div class="text-muted">Purok: {{ citizen.purok }} • Generated: {{ now().strftime('%Y-%m-%d') }}</div>
+    </div>
+    <div class="no-print">
+        <button class="btn btn-primary" onclick="window.print()">Print</button>
+        <a class="btn btn-secondary" href="{{ url_for('citizen_detail', citizen_id=citizen.id) }}">Back</a>
+    </div>
+    </div>
+
+<div class="mt-4">
+    {% if cases and cases|length > 0 %}
+        {% for c in cases %}
+        <div class="case-row">
+            <h5 class="mb-1">{{ c.title }} {% if c.article %}<small class="text-muted">({{ c.article }})</small>{% endif %}</h5>
+            {% if c.notes %}<div class="mb-1">{{ c.notes }}</div>{% endif %}
+            <div class="text-muted small">Added: {{ c.date_added }}</div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="alert alert-light">No cases found for this citizen.</div>
+    {% endif %}
+</div>
+
+{% endblock %}

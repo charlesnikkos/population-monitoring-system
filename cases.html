@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block title %}Lupon Cases{% endblock %}
+
+{% block content %}
+<style>
+    .cases-header {
+        background: linear-gradient(135deg,#2c3e50,#4ca1af);
+        color: white;
+        padding: 1.5rem;
+        border-radius: 12px;
+        margin-bottom: 1.5rem;
+        transition: background 0.3s ease;
+    }
+
+    body.dark-mode .cases-header {
+        background: linear-gradient(135deg, #1a1a2e, #16213e);
+    }
+
+    .case-card {
+        background: white;
+        border-radius: 8px;
+        padding: 1rem;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        margin-bottom: 0.75rem;
+        transition: background 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    body.dark-mode .case-card {
+        background: #1e1e1e;
+        color: #e0e0e0;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    }
+
+    .case-title {
+        font-weight: 700;
+        color: #2c3e50;
+        transition: color 0.3s ease;
+    }
+
+    body.dark-mode .case-title {
+        color: #e0e0e0;
+    }
+
+    .case-article {
+        color: #6c757d;
+        font-size: 0.9rem;
+        transition: color 0.3s ease;
+    }
+
+    body.dark-mode .case-article {
+        color: #999;
+    }
+</style>
+
+<div class="cases-header">
+    <h2 class="mb-0">📚 Lupon Cases</h2>
+    <p class="mb-0 opacity-75">Listahan sa mga kaso nga kasagaran masukod sa lupon (barangay complaints)</p>
+</div>
+
+<div class="mb-3">
+    {% if session.role == 'admin' %}
+    <a class="btn btn-sm btn-success" href="{{ url_for('add_case') }}">Add Case to Citizen</a>
+    {% endif %}
+</div>
+
+<div class="row">
+    <div class="col-12">
+        {% for c in cases %}
+        <div class="case-card">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <div class="case-title">{{ c.title }}</div>
+                    {% if c.article %}
+                    <div class="case-article">{{ c.article }}</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+{% endblock %}

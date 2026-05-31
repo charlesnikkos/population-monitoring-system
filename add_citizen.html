@@ -1,0 +1,218 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Edit Citizen' if citizen else 'Add Citizen' }}{% endblock %}
+
+{% block content %}
+<style>
+    .form-container { max-width: 750px; margin: 0 auto; background: white; padding: 2rem; border-radius: 16px; box-shadow: 0 8px 24px rgba(0,0,0,0.1); }
+    .photo-section { text-align: center; margin-bottom: 2rem; padding: 1.5rem; background: #f8f9fa; border-radius: 12px; }
+    .photo-preview { width: 150px; height: 150px; border-radius: 50%; object-fit: cover; border: 4px solid #3498db; margin: 0 auto 1rem; display: block; background: #e9ecef; }
+    .photo-btns { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+    .btn-cam, .btn-up { padding: 8px 16px; border-radius: 8px; border: none; cursor: pointer; font-weight: 600; transition: 0.2s; color: white; }
+    .btn-cam { background: #3498db; } .btn-up { background: #2ecc71; }
+    .btn-cam:hover, .btn-up:hover { transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+    #cameraModal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 9999; justify-content: center; align-items: center; }
+    #cameraModal.show { display: flex; }
+    .cam-box { background: white; padding: 1.5rem; border-radius: 12px; max-width: 500px; width: 90%; }
+    #video { width: 100%; border-radius: 8px; background: #000; }
+    .cam-acts { display: flex; gap: 10px; margin-top: 1rem; justify-content: center; }
+    #capturedImage { display: none; }
+</style>
+
+<div class="form-container animate-page">
+    <h3 class="text-center mb-4 fw-bold text-primary">📝 {{ 'Edit Citizen' if citizen else 'Add New Citizen' }}</h3>
+    
+    <form method="POST" enctype="multipart/form-data" id="citizenForm" action="{{ action_url or url_for('add_citizen') }}">
+        <div class="photo-section">
+            <h5 class="mb-2">Citizen Photo</h5>
+            <img id="preview" src="{{ url_for('static', filename='uploads/' ~ citizen.photo) if citizen and citizen.photo and citizen.photo != 'default.png' else url_for('static', filename='logo.png') }}" class="photo-preview" alt="Preview">
+            <div class="photo-btns">
+                <button type="button" class="btn-cam" onclick="openCam()"><i class="bi bi-camera-video"></i> Capture</button>
+                <button type="button" class="btn-up" onclick="document.getElementById('fileInput').click()"><i class="bi bi-upload"></i> Upload</button>
+            </div>
+            <input type="file" id="fileInput" name="photo" accept="image/*" style="display:none" onchange="handleFile(this)">
+            <input type="hidden" id="capturedImageData" name="captured_photo">
+        </div>
+
+        <div class="row g-3">
+            <div class="col-md-4"><label class="form-label fw-bold">First Name</label><input name="first_name" class="form-control" required value="{{ first_name | default('') }}"></div>
+            <div class="col-md-4"><label class="form-label fw-bold">Middle Name</label><input name="middle_name" class="form-control" value="{{ middle_name | default('') }}"></div>
+            <div class="col-md-4"><label class="form-label fw-bold">Last Name</label><input name="last_name" class="form-control" required value="{{ last_name | default('') }}"></div>
+            <div class="col-md-6"><label class="form-label fw-bold">Birthdate</label><input type="date" name="birthdate" class="form-control" required value="{{ birthdate | default('') }}"></div>
+            <div class="col-md-6"><label class="form-label fw-bold">Place of Birth</label><input name="place_of_birth" class="form-control" required value="{{ place_of_birth | default('') }}"></div>
+            <div class="col-md-6"><label class="form-label fw-bold">Nationality / Citizenship</label><input name="nationality" class="form-control" required value="{{ nationality | default('') }}"></div>
+            <div class="col-md-6"><label class="form-label fw-bold">Email Address <span class="text-muted">(optional)</span></label><input type="email" name="email" class="form-control" value="{{ email | default('') }}"></div>
+            <div class="col-md-6"><label class="form-label fw-bold">Contact Number</label><input name="contact_number" class="form-control" required value="{{ contact_number | default('') }}"></div>
+            <div class="col-md-6"><label class="form-label fw-bold">Age</label><input type="number" name="age" class="form-control" min="0" max="150" required value="{{ age | default('') }}"></div>
+            <div class="col-md-6"><label class="form-label fw-bold">Gender</label>
+                <select name="gender" class="form-select" required>
+                    <option value="">Select...</option>
+                    <option {% if citizen and citizen.gender == 'Male' %}selected{% endif %}>Male</option>
+                    <option {% if citizen and citizen.gender == 'Female' %}selected{% endif %}>Female</option>
+                </select>
+            </div>
+            <div class="col-12"><label class="form-label fw-bold">Address</label><input name="address" class="form-control" required value="{{ citizen.address if citizen else '' }}"></div>
+            <div class="col-md-6"><label class="form-label fw-bold">Civil Status</label>
+                <select name="status" class="form-select">
+                    <option value="Single" {% if citizen and citizen.status == 'Single' %}selected{% endif %}>Single</option>
+                    <option value="Married" {% if citizen and citizen.status == 'Married' %}selected{% endif %}>Married</option>
+                    <option value="Widowed" {% if citizen and citizen.status == 'Widowed' %}selected{% endif %}>Widowed</option>
+                    <option value="Separated" {% if citizen and citizen.status == 'Separated' %}selected{% endif %}>Separated</option>
+                    <option value="N/A" {% if citizen and citizen.status == 'N/A' %}selected{% endif %}>N/A</option>
+                </select>
+            </div>
+            <div class="col-md-6"><label class="form-label fw-bold">Occupation</label><input name="occupation" class="form-control" value="{{ citizen.occupation if citizen else 'N/A' }}"></div>
+            <div class="col-md-6"><label class="form-label fw-bold">Special Status</label>
+                <select name="special_status" class="form-select">
+                    <option value="None" {% if citizen and citizen.special_status == 'None' %}selected{% endif %}>None</option>
+                    <option value="Senior" {% if citizen and citizen.special_status == 'Senior' %}selected{% endif %}>Senior</option>
+                    <option value="PWD" {% if citizen and citizen.special_status == 'PWD' %}selected{% endif %}>PWD</option>
+                    <option value="Solo Parent" {% if citizen and citizen.special_status == 'Solo Parent' %}selected{% endif %}>Solo Parent</option>
+                    <option value="Indigenous" {% if citizen and citizen.special_status == 'Indigenous' %}selected{% endif %}>Indigenous</option>
+                    <option value="4Ps Beneficiary" {% if citizen and citizen.special_status == '4Ps Beneficiary' %}selected{% endif %}>4Ps Beneficiary</option>
+                </select>
+            </div>
+            <div class="col-md-6"><label class="form-label fw-bold">Purok</label><input name="purok" class="form-control" placeholder="e.g., Purok 1" required value="{{ citizen.purok if citizen else '' }}"></div>
+        </div>
+        <div class="mt-4 d-flex gap-2 justify-content-end">
+            <a href="/citizens" class="btn btn-secondary">Cancel</a>
+            <button type="submit" class="btn btn-primary px-4"><i class="bi bi-check-circle"></i> Save Citizen</button>
+        </div>
+    </form>
+</div>
+
+<!-- Camera Modal -->
+<div id="cameraModal">
+    <div class="cam-box">
+        <h5 class="mb-3">📷 Take Photo</h5>
+        <video id="video" autoplay playsinline></video>
+        <canvas id="canvas" style="display:none"></canvas>
+        <img id="capturedImage" style="display:none; width:100%; border-radius:8px; margin-top:10px;">
+        <div class="cam-acts">
+            <button class="btn btn-success" onclick="capture()"><i class="bi bi-camera"></i> Capture</button>
+            <button class="btn btn-secondary" onclick="retake()" id="retakeBtn" style="display:none"><i class="bi bi-arrow-counterclockwise"></i> Retake</button>
+            <button class="btn btn-danger" onclick="closeCam()"><i class="bi bi-x-lg"></i> Close</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let stream = null;
+    let capturedBlob = null;
+    const modal = document.getElementById('cameraModal');
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const preview = document.getElementById('preview');
+    const fileInput = document.getElementById('fileInput');
+    const capturedImage = document.getElementById('capturedImage');
+    const capturedDataInput = document.getElementById('capturedImageData');
+    const captureBtn = document.querySelector('.btn-success');
+    const retakeBtn = document.getElementById('retakeBtn');
+
+    function openCam() {
+        modal.classList.add('show');
+        navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } })
+            .then(s => { 
+                stream = s; 
+                video.srcObject = s;
+                capturedImage.style.display = 'none';
+                video.style.display = 'block';
+                captureBtn.style.display = 'inline-block';
+                retakeBtn.style.display = 'none';
+            })
+            .catch(err => { 
+                console.error('Camera error:', err);
+                alert('Camera access denied or not available. Please use upload instead.'); 
+                closeCam(); 
+            });
+    }
+
+    function closeCam() {
+        if (stream) {
+            stream.getTracks().forEach(t => t.stop());
+            stream = null;
+        }
+        video.srcObject = null;
+        modal.classList.remove('show');
+    }
+
+    function capture() {
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        canvas.getContext('2d').drawImage(video, 0, 0);
+        
+        // Convert to blob
+        canvas.toBlob(blob => {
+            capturedBlob = blob;
+            const url = URL.createObjectURL(blob);
+            
+            // Show captured image
+            capturedImage.src = url;
+            capturedImage.style.display = 'block';
+            video.style.display = 'none';
+            
+            // Update preview
+            preview.src = url;
+
+            // Create a File object for the captured image and attach it to the file input.
+            const capturedFile = new File([blob], `capture_${Date.now()}.jpg`, { type: 'image/jpeg' });
+            const dt = new DataTransfer();
+            dt.items.add(capturedFile);
+            fileInput.files = dt.files;
+            capturedBlob = capturedFile;
+
+            // Convert to base64 for form submission fallback
+            const reader = new FileReader();
+            reader.onloadend = function() {
+                capturedDataInput.value = reader.result;
+            }
+            reader.readAsDataURL(blob);
+
+            // Toggle buttons
+            captureBtn.style.display = 'none';
+            retakeBtn.style.display = 'inline-block';
+            
+        }, 'image/jpeg', 0.9);
+    }
+
+    function retake() {
+        capturedBlob = null;
+        capturedDataInput.value = '';
+        fileInput.value = '';
+        preview.src = "{{ url_for('static', filename='logo.png') }}";
+        capturedImage.style.display = 'none';
+        video.style.display = 'block';
+        captureBtn.style.display = 'inline-block';
+        retakeBtn.style.display = 'none';
+    }
+
+    function handleFile(input) {
+        if (input.files && input.files[0]) {
+            const file = input.files[0];
+            const url = URL.createObjectURL(file);
+            preview.src = url;
+            capturedBlob = file;
+            
+            // Read as base64
+            const reader = new FileReader();
+            reader.onloadend = function() {
+                capturedDataInput.value = reader.result;
+            }
+            reader.readAsDataURL(file);
+        }
+    }
+
+    // Form submission handler
+    document.getElementById('citizenForm').addEventListener('submit', function(e) {
+        // Create hidden input for the photo if captured
+        if (capturedBlob) {
+            const formData = new FormData(this);
+            if (capturedBlob instanceof File) {
+                formData.set('photo', capturedBlob);
+            } else if (capturedDataInput.value) {
+                // For camera capture, we'll handle it in backend via base64
+                formData.set('captured_photo', capturedDataInput.value);
+            }
+        }
+    });
+</script>
+{% endblock %}

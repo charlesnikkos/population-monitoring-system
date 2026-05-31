@@ -1,0 +1,440 @@
+{% extends "base.html" %}
+{% block title %}Purok {{ purok_name }}{% endblock %}
+
+{% block content %}
+<style>
+    .page-header {
+        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 16px;
+        margin-bottom: 2rem;
+        box-shadow: 0 8px 24px rgba(30, 60, 114, 0.2);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .back-btn {
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        padding: 8px 16px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: 0.2s;
+        border: 1px solid rgba(255,255,255,0.3);
+    }
+    .back-btn:hover {
+        background: rgba(255, 255, 255, 0.3);
+        color: white;
+    }
+
+    .purok-search {
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+        align-items: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .purok-search input {
+        flex: 1 1 320px;
+        padding: 0.9rem 1rem;
+        border-radius: 12px;
+        border: 1px solid #dfe3e8;
+        box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.03);
+        transition: border-color 0.2s ease;
+    }
+
+    .purok-search input:focus {
+        outline: none;
+        border-color: #4f8bff;
+        box-shadow: 0 0 0 4px rgba(79, 139, 255, 0.12);
+    }
+
+    .purok-search button,
+    .purok-search .btn-clear {
+        min-width: 120px;
+        white-space: nowrap;
+    }
+
+    .purok-search .btn-clear {
+        border: 1px solid #ced4da;
+        background: #f8f9fa;
+        color: #495057;
+    }
+
+    .purok-search .btn-clear:hover {
+        background: #e9ecef;
+    }
+
+    .search-note {
+        color: #6c757d;
+        font-size: 0.95rem;
+        margin-top: 0.75rem;
+    }
+
+    .section-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #2c3e50;
+        margin: 2rem 0 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 3px solid #3498db;
+        display: inline-block;
+    }
+
+    .stat-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.2rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .stat-card {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        border: 1px solid #f0f0f0;
+    }
+
+    .stat-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-icon {
+        font-size: 1.8rem;
+    }
+
+    .stat-number {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #2c3e50;
+        margin: 0;
+    }
+
+    .stat-percent {
+        font-size: 1rem;
+        font-weight: 600;
+        padding: 2px 8px;
+        border-radius: 4px;
+        background: #f8f9fa;
+    }
+
+    .stat-label {
+        font-size: 0.85rem;
+        color: #7f8c8d;
+        margin: 0;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .progress-bar {
+        height: 8px;
+        border-radius: 4px;
+        margin-top: 0.8rem;
+        background: #e9ecef;
+        overflow: hidden;
+    }
+
+    .progress-fill {
+        height: 100%;
+        border-radius: 4px;
+        transition: width 0.5s ease;
+    }
+
+    .citizens-card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.05);
+        overflow: hidden;
+        margin-top: 2rem;
+    }
+
+    .citizens-header {
+        padding: 1.5rem;
+        background: #f8f9fa;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    .table-custom th {
+        background: #f8f9fa;
+        color: #495057;
+        font-weight: 600;
+        border-bottom: 2px solid #e9ecef;
+    }
+    
+    .table-custom td {
+        vertical-align: middle;
+        color: #495057;
+        padding: 1rem;
+    }
+
+    .badge-gender {
+        padding: 4px 10px;
+        border-radius: 6px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+
+    .badge-status {
+        padding: 4px 10px;
+        border-radius: 6px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+</style>
+
+<!-- Header Section -->
+<div class="page-header">
+    <div>
+        <h2 class="fw-bold mb-1">📍 Purok {{ purok_name }}</h2>
+        <p class="mb-0 opacity-75">Population summary and analytics</p>
+    </div>
+    <a href="/dashboard" class="back-btn">
+        <i class="bi bi-arrow-left me-1"></i> Dashboard
+    </a>
+</div>
+
+<form method="get" class="purok-search" action="{{ url_for('purok_detail', purok_name=purok_name) }}">
+    <input
+        type="search"
+        name="q"
+        value="{{ search or '' }}"
+        placeholder="Search residents by name or address..."
+        aria-label="Search residents"
+    />
+    <button type="submit" class="btn btn-primary">Search</button>
+    {% if search %}
+        <a href="{{ url_for('purok_detail', purok_name=purok_name) }}" class="btn btn-clear">Clear</a>
+    {% endif %}
+</form>
+
+{% if search %}
+    <p class="search-note">Showing {{ filtered_count }} of {{ total_population }} residents matching "{{ search }}".</p>
+{% endif %}
+
+<!-- Gender Distribution -->
+<h5 class="section-title">👥 Gender Distribution</h5>
+<div class="stat-grid">
+    <div class="stat-card">
+        <div class="stat-header">
+            <span class="stat-icon">👥</span>
+            <span class="stat-percent" style="background: #3498db; color: white;">100%</span>
+        </div>
+        <p class="stat-number">{{ total_population }}</p>
+        <p class="stat-label">Total Population</p>
+        <div class="progress-bar">
+            <div class="progress-fill" style="width: 100%; background: #3498db;"></div>
+        </div>
+    </div>
+    
+    <div class="stat-card">
+        <div class="stat-header">
+            <span class="stat-icon">👨</span>
+            <span class="stat-percent" style="color: #3498db;">
+                {% if total_population > 0 %}{{ ((male_population / total_population) * 100)|round(1) }}%{% else %}0%{% endif %}
+            </span>
+        </div>
+        <p class="stat-number" style="color: #3498db;">{{ male_population }}</p>
+        <p class="stat-label">Male</p>
+        <div class="progress-bar">
+            <div class="progress-fill" style="width: {% if total_population > 0 %}{{ (male_population / total_population) * 100 }}{% else %}0{% endif %}%; background: #3498db;"></div>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-header">
+            <span class="stat-icon">👩</span>
+            <span class="stat-percent" style="color: #e74c3c;">
+                {% if total_population > 0 %}{{ ((female_population / total_population) * 100)|round(1) }}%{% else %}0%{% endif %}
+            </span>
+        </div>
+        <p class="stat-number" style="color: #e74c3c;">{{ female_population }}</p>
+        <p class="stat-label">Female</p>
+        <div class="progress-bar">
+            <div class="progress-fill" style="width: {% if total_population > 0 %}{{ (female_population / total_population) * 100 }}{% else %}0{% endif %}%; background: #e74c3c;"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Age Demographics -->
+<h5 class="section-title">📊 Age Demographics</h5>
+<div class="stat-grid">
+    <div class="stat-card">
+        <div class="stat-header">
+            <span class="stat-icon">🧒</span>
+            <span class="stat-percent" style="color: #f39c12;">
+                {% if total_population > 0 %}{{ ((kids_population / total_population) * 100)|round(1) }}%{% else %}0%{% endif %}
+            </span>
+        </div>
+        <p class="stat-number" style="color: #f39c12;">{{ kids_population }}</p>
+        <p class="stat-label">Kids (0-12)</p>
+        <div class="progress-bar">
+            <div class="progress-fill" style="width: {% if total_population > 0 %}{{ (kids_population / total_population) * 100 }}{% else %}0{% endif %}%; background: #f39c12;"></div>
+        </div>
+    </div>
+    
+    <div class="stat-card">
+        <div class="stat-header">
+            <span class="stat-icon">🧑</span>
+            <span class="stat-percent" style="color: #2ecc71;">
+                {% if total_population > 0 %}{{ ((teens_population / total_population) * 100)|round(1) }}%{% else %}0%{% endif %}
+            </span>
+        </div>
+        <p class="stat-number" style="color: #2ecc71;">{{ teens_population }}</p>
+        <p class="stat-label">Teens (13-19)</p>
+        <div class="progress-bar">
+            <div class="progress-fill" style="width: {% if total_population > 0 %}{{ (teens_population / total_population) * 100 }}{% else %}0{% endif %}%; background: #2ecc71;"></div>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-header">
+            <span class="stat-icon">🧑💼</span>
+            <span class="stat-percent" style="color: #2c3e50;">
+                {% if total_population > 0 %}{{ ((adults_population / total_population) * 100)|round(1) }}%{% else %}0%{% endif %}
+            </span>
+        </div>
+        <p class="stat-number" style="color: #2c3e50;">{{ adults_population }}</p>
+        <p class="stat-label">Adults (20-59)</p>
+        <div class="progress-bar">
+            <div class="progress-fill" style="width: {% if total_population > 0 %}{{ (adults_population / total_population) * 100 }}{% else %}0{% endif %}%; background: #2c3e50;"></div>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-header">
+            <span class="stat-icon">🧓</span>
+            <span class="stat-percent" style="color: #8e44ad;">
+                {% if total_population > 0 %}{{ ((seniors_population / total_population) * 100)|round(1) }}%{% else %}0%{% endif %}
+            </span>
+        </div>
+        <p class="stat-number" style="color: #8e44ad;">{{ seniors_population }}</p>
+        <p class="stat-label">Seniors (60+)</p>
+        <div class="progress-bar">
+            <div class="progress-fill" style="width: {% if total_population > 0 %}{{ (seniors_population / total_population) * 100 }}{% else %}0{% endif %}%; background: #8e44ad;"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Special Categories -->
+<h5 class="section-title">❤️ Special Categories</h5>
+<div class="stat-grid">
+    <div class="stat-card">
+        <div class="stat-header">
+            <span class="stat-icon">♿</span>
+            <span class="stat-percent" style="color: #27ae60;">
+                {% if total_population > 0 %}{{ ((pwd_population / total_population) * 100)|round(1) }}%{% else %}0%{% endif %}
+            </span>
+        </div>
+        <p class="stat-number" style="color: #27ae60;">{{ pwd_population }}</p>
+        <p class="stat-label">PWD</p>
+        <div class="progress-bar">
+            <div class="progress-fill" style="width: {% if total_population > 0 %}{{ (pwd_population / total_population) * 100 }}{% else %}0{% endif %}%; background: #27ae60;"></div>
+        </div>
+    </div>
+    
+    <div class="stat-card">
+        <div class="stat-header">
+            <span class="stat-icon">👪</span>
+            <span class="stat-percent" style="color: #d35400;">
+                {% if total_population > 0 %}{{ ((solo_parents_population / total_population) * 100)|round(1) }}%{% else %}0%{% endif %}
+            </span>
+        </div>
+        <p class="stat-number" style="color: #d35400;">{{ solo_parents_population }}</p>
+        <p class="stat-label">Solo Parents</p>
+        <div class="progress-bar">
+            <div class="progress-fill" style="width: {% if total_population > 0 %}{{ (solo_parents_population / total_population) * 100 }}{% else %}0{% endif %}%; background: #d35400;"></div>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-header">
+            <span class="stat-icon">🌿</span>
+            <span class="stat-percent" style="color: #16a085;">
+                {% if total_population > 0 %}{{ ((indigenous_population / total_population) * 100)|round(1) }}%{% else %}0%{% endif %}
+            </span>
+        </div>
+        <p class="stat-number" style="color: #16a085;">{{ indigenous_population }}</p>
+        <p class="stat-label">Indigenous</p>
+        <div class="progress-bar">
+            <div class="progress-fill" style="width: {% if total_population > 0 %}{{ (indigenous_population / total_population) * 100 }}{% else %}0{% endif %}%; background: #16a085;"></div>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-header">
+            <span class="stat-icon">💳</span>
+            <span class="stat-percent" style="color: #8e44ad;">
+                {% if total_population > 0 %}{{ ((fourps_population / total_population) * 100)|round(1) }}%{% else %}0%{% endif %}
+            </span>
+        </div>
+        <p class="stat-number" style="color: #8e44ad;">{{ fourps_population }}</p>
+        <p class="stat-label">4Ps Beneficiaries</p>
+        <div class="progress-bar">
+            <div class="progress-fill" style="width: {% if total_population > 0 %}{{ (fourps_population / total_population) * 100 }}{% else %}0{% endif %}%; background: #8e44ad;"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Citizens Table -->
+<div class="citizens-card">
+    <div class="citizens-header">
+        <h4 class="mb-0 fw-bold text-dark">📝 Resident List</h4>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover table-custom mb-0">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Gender</th>
+                    <th>Age</th>
+                    <th>Category</th>
+                    <th>Special Status</th>
+                    <th>Address</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for citizen in citizens %}
+                <tr>
+                    <td class="fw-bold">{{ citizen.fullname }}</td>
+                    <td>
+                        {% if citizen.gender == 'Male' %}
+                            <span class="badge-gender" style="background: #e3f2fd; color: #1976d2;">👨 Male</span>
+                        {% else %}
+                            <span class="badge-gender" style="background: #fce4ec; color: #c2185b;">👩 Female</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ citizen.age }}</td>
+                    <td>{{ citizen.age_category }}</td>
+                    <td>
+                        {% if 'Senior' in citizen.special_status %}
+                            <span class="badge-status" style="background: #f3e5f5; color: #7b1fa2;">🧓 Senior</span>
+                        {% elif 'PWD' in citizen.special_status %}
+                            <span class="badge-status" style="background: #e8f5e9; color: #388e3c;">♿ PWD</span>
+                        {% elif '4Ps' in citizen.special_status %}
+                            <span class="badge-status" style="background: #fff3e0; color: #f57c00;">💳 4Ps</span>
+                        {% else %}
+                            <span class="text-muted">None</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-muted small">{{ citizen.address }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="6" class="text-center text-muted py-4">
+                        No residents found in this Purok.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

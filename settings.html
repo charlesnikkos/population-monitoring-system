@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2 class="mb-4">Settings</h2>
+<div class="row g-3">
+    <div class="col-md-4">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h5>Total Accounts</h5>
+                <p class="fs-3">{{ total_users }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h5>Total Citizens</h5>
+                <p class="fs-3">{{ total_citizens }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="mt-4">
+    <div class="alert alert-info">
+        <strong>Data privacy:</strong> Citizen records are private and only accessible by signed-in admin users. No public access is allowed.
+    </div>
+</div>
+{% endblock %}

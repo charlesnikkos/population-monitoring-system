@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+{% block title %}Ayuda Assistance{% endblock %}
+
+{% block content %}
+<style>
+    .page-header {
+        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 16px;
+        margin-bottom: 2rem;
+        box-shadow: 0 8px 24px rgba(30, 60, 114, 0.2);
+    }
+    
+    .status-badge {
+        padding: 6px 12px;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        display: inline-block;
+    }
+    
+    .status-pending {
+        background: #fff3cd;
+        color: #856404 !important;
+    }
+    
+    .status-released {
+        background: #d4edda;
+        color: #155724 !important;
+    }
+    
+    .amount-badge {
+        background: #17a2b8;
+        color: white !important;
+        padding: 4px 10px;
+        border-radius: 6px;
+        font-weight: 600;
+    }
+    
+    .table th {
+        background: #f8f9fa;
+        color: #2c3e50 !important;
+        font-weight: 600;
+    }
+    
+    .table td {
+        color: #495057 !important;
+        vertical-align: middle;
+    }
+</style>
+
+<div class="page-header">
+    <div class="row align-items-center">
+        <div class="col">
+            <h2 class="fw-bold mb-2">💖 Ayuda (Financial Assistance)</h2>
+            <p class="mb-0 opacity-75">Manage financial aid requests and releases by barangay</p>
+        </div>
+        <div class="col-auto">
+            <a href="/certificates" class="btn btn-light fw-bold">
+                <i class="bi bi-arrow-left me-2"></i>Back to Certificate Center
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th>Citizen</th>
+                        <th>Ayuda Type</th>
+                        <th>Amount</th>
+                        <th>Requested</th>
+                        <th>Released</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ayuda in ayudas %}
+                    <tr>
+                        <td class="fw-bold">{{ ayuda.citizen.fullname }}</td>
+                        <td>{{ ayuda.ayuda_type }}</td>
+                        <td><span class="amount-badge">₱{{ "%.2f"|format(ayuda.amount) }}</span></td>
+                        <td>{{ ayuda.date_requested }}</td>
+                        <td>{{ ayuda.date_released or '-' }}</td>
+                        <td>
+                            {% if ayuda.status == 'Released' %}
+                                <span class="status-badge status-released">✓ Released</span>
+                            {% else %}
+                                <span class="status-badge status-pending">⏳ Pending</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if ayuda.status != 'Released' %}
+                                <a href="/ayuda/release/{{ ayuda.id }}" 
+                                   class="btn btn-success btn-sm">
+                                    <i class="bi bi-check-circle me-1"></i>Release
+                                </a>
+                            {% else %}
+                                <span class="text-success">✓ Released</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="7" class="text-center text-muted py-4">
+                            No ayuda requests yet.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

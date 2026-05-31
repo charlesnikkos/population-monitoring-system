@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+{% block title %}Add Account{% endblock %}
+
+{% block content %}
+<style>
+    .page-header {
+        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 16px;
+        margin-bottom: 2rem;
+        box-shadow: 0 8px 24px rgba(30, 60, 114, 0.2);
+    }
+    
+    .form-card {
+        background: white;
+        border-radius: 16px;
+        padding: 2.5rem;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+        max-width: 600px;
+        margin: 0 auto;
+    }
+    
+    .form-label {
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 0.5rem;
+    }
+    
+    .form-control, .form-select {
+        border: 2px solid #e9ecef;
+        border-radius: 10px;
+        padding: 12px;
+        transition: all 0.2s;
+    }
+    
+    .form-control:focus, .form-select:focus {
+        border-color: #2a5298;
+        box-shadow: 0 0 0 4px rgba(42, 82, 152, 0.1);
+    }
+    
+    .btn-submit {
+        background: linear-gradient(135deg, #1e3c72, #2a5298);
+        color: white;
+        border: none;
+        padding: 12px;
+        border-radius: 10px;
+        font-weight: 600;
+        width: 100%;
+        margin-top: 1rem;
+    }
+    .btn-submit:hover {
+        opacity: 0.9;
+        color: white;
+    }
+    
+    .role-info {
+        background: #e3f2fd;
+        border-left: 4px solid #2a5298;
+        padding: 1rem;
+        border-radius: 4px;
+        margin-top: 1rem;
+        font-size: 0.9rem;
+        color: #555;
+    }
+</style>
+
+<!-- Header -->
+<div class="page-header text-center">
+    <h2 class="fw-bold mb-2">🆕 Create New Account</h2>
+    <p class="mb-0 opacity-75">Add a new user to the Barangay Taft System</p>
+</div>
+
+<!-- Form Card -->
+<div class="form-card">
+    <form method="POST" action="/add_account">
+        <div class="mb-3">
+            <label class="form-label">Username</label>
+            <div class="input-group">
+                <span class="input-group-text bg-white"><i class="bi bi-person"></i></span>
+                <input type="text" name="username" class="form-control" placeholder="Enter username" required>
+            </div>
+        </div>
+        
+        <div class="mb-3">
+            <label class="form-label">Password</label>
+            <div class="input-group">
+                <span class="input-group-text bg-white"><i class="bi bi-lock"></i></span>
+                <input type="password" name="password" class="form-control" placeholder="Enter secure password" required>
+            </div>
+        </div>
+        
+        <div class="mb-3">
+            <label class="form-label">User Role</label>
+            <select name="role" class="form-select" required onchange="updateRoleInfo()">
+                <option value="admin">👑 Admin (Full Access)</option>
+                <option value="staff"> Staff (Limited Access)</option>
+            </select>
+            
+            <!-- Dynamic Role Description -->
+            <div id="role-desc" class="role-info">
+                <strong>Admin:</strong> Can manage citizens, approve documents, add accounts, and view all stats.
+            </div>
+        </div>
+        
+        <button type="submit" class="btn-submit shadow-sm">
+            <i class="bi bi-check-circle me-2"></i>Create Account
+        </button>
+        <a href="/accounts" class="btn btn-link w-100 text-center mt-2 text-muted">Cancel</a>
+    </form>
+</div>
+
+<script>
+    function updateRoleInfo() {
+        const select = document.querySelector('select[name="role"]');
+        const desc = document.getElementById('role-desc');
+        
+        if (select.value === 'admin') {
+            desc.innerHTML = '<strong>Admin:</strong> Can manage citizens, approve documents, add accounts, and view all stats.';
+            desc.style.borderLeftColor = '#d63031';
+            desc.style.background = '#ffeaa7';
+        } else {
+            desc.innerHTML = '<strong>Staff:</strong> Can view citizens and make requests, but cannot delete records or manage users.';
+            desc.style.borderLeftColor = '#00b894';
+            desc.style.background = '#81ecec';
+        }
+    }
+</script>
+{% endblock %}

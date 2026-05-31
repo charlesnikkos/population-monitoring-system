@@ -1,0 +1,257 @@
+{% extends "base.html" %}
+
+{% block title %}Assigned Lupon Cases{% endblock %}
+
+{% block content %}
+<style>
+.page-grid { 
+    display: grid; 
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); 
+    gap: 1rem; 
+    margin-bottom: 1.5rem; 
+}
+
+.info-card { 
+    background: white; 
+    border-radius: 16px; 
+    padding: 1.4rem; 
+    box-shadow: 0 6px 18px rgba(0,0,0,0.05);
+    transition: background 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+}
+
+body.dark-mode .info-card {
+    background: #1e1e1e;
+    color: #e0e0e0;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
+}
+
+.info-card h2 { 
+    margin: 0; 
+    font-size: 2rem; 
+    color: #1e3c72;
+    transition: color 0.3s ease;
+}
+
+body.dark-mode .info-card h2 {
+    color: #667eea;
+}
+
+.info-card p { 
+    margin: 0.5rem 0 0; 
+    color: #6c757d;
+    transition: color 0.3s ease;
+}
+
+body.dark-mode .info-card p {
+    color: #999;
+}
+
+.table-card { 
+    padding: 1.5rem; 
+    border-radius: 16px; 
+    background: white; 
+    box-shadow: 0 6px 24px rgba(0,0,0,0.08);
+    transition: background 0.3s ease, box-shadow 0.3s ease;
+}
+
+body.dark-mode .table-card {
+    background: #1e1e1e;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.4);
+}
+
+.requests-table { 
+    width: 100%; 
+    border-collapse: collapse; 
+}
+
+.requests-table thead th { 
+    background: #f1f5f9; 
+    color: #34495e; 
+    font-weight: 700; 
+    padding: 1rem 0.75rem; 
+    text-align: left; 
+    border-bottom: 2px solid #e2e8f0;
+    transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+body.dark-mode .requests-table thead th {
+    background: #2c3e50;
+    color: #e0e0e0;
+    border-bottom-color: #444;
+}
+
+.requests-table tbody tr { 
+    border-bottom: 1px solid #e9ecef;
+    transition: background 0.3s ease;
+}
+
+body.dark-mode .requests-table tbody tr {
+    border-bottom-color: #333;
+}
+
+.requests-table tbody tr:nth-child(even) { 
+    background: #fbfcfd;
+    transition: background 0.3s ease;
+}
+
+body.dark-mode .requests-table tbody tr:nth-child(even) {
+    background: #2c3e50;
+}
+
+.requests-table tbody td { 
+    padding: 0.95rem 0.75rem; 
+    vertical-align: top;
+    color: #34495e;
+    transition: color 0.3s ease;
+}
+
+body.dark-mode .requests-table tbody td {
+    color: #e0e0e0;
+}
+
+.requests-table a { 
+    color: #1e3c72; 
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+body.dark-mode .requests-table a {
+    color: #667eea;
+}
+
+.requests-table a:hover { 
+    text-decoration: underline; 
+}
+
+.action-buttons { 
+    display: flex; 
+    flex-wrap: wrap; 
+    gap: 0.5rem; 
+}
+
+.btn-ghost { 
+    background: #f8fafc; 
+    color: #34495e; 
+    border: 1px solid #dbe4ed;
+    transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+body.dark-mode .btn-ghost {
+    background: #2c3e50;
+    color: #e0e0e0;
+    border-color: #444;
+}
+
+.btn-ghost:hover { 
+    background: #e2e8f0;
+}
+
+body.dark-mode .btn-ghost:hover {
+    background: #3d5066;
+}
+
+.empty-state { 
+    text-align: center; 
+    padding: 2.5rem; 
+    color: #6c757d;
+    transition: color 0.3s ease;
+}
+
+body.dark-mode .empty-state {
+    color: #999;
+}
+
+.empty-state i { 
+    font-size: 3rem; 
+    margin-bottom: 1rem; 
+    color: #94a3b8;
+    transition: color 0.3s ease;
+}
+
+body.dark-mode .empty-state i {
+    color: #666;
+}
+
+.page-header {
+    background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+    color: white;
+    padding: 1.4rem;
+    border-radius: 16px;
+    margin-bottom: 1.5rem;
+    transition: background 0.3s ease;
+}
+
+body.dark-mode .page-header {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+}
+</style>
+
+<div class="page-header">
+    <div class="d-flex justify-content-between align-items-start gap-3 flex-column flex-md-row">
+        <div>
+            <h3 class="mb-2">Assigned Lupon Cases</h3>
+            <p class="mb-0 opacity-75">A centralized list of citizens with cases already assigned by the lupon.</p>
+        </div>
+        <div class="d-flex gap-2 flex-wrap">
+            <a class="btn btn-light" href="{{ url_for('cases') }}">Master Case List</a>
+            <a class="btn btn-outline-light" href="{{ url_for('add_case') }}">Add Case</a>
+        </div>
+    </div>
+</div>
+
+<div class="page-grid">
+    <div class="info-card">
+        <h2>{{ total_cases }}</h2>
+        <p>Total Cases Assigned</p>
+    </div>
+    <div class="info-card">
+        <h2>{{ unique_citizens }}</h2>
+        <p>Citizens with Assigned Cases</p>
+    </div>
+</div>
+
+<div class="table-card">
+    {% if cases and cases|length > 0 %}
+    <div style="overflow-x:auto;">
+        <table class="requests-table">
+            <thead>
+                <tr>
+                    <th>Citizen</th>
+                    <th>Case</th>
+                    <th>Article</th>
+                    <th>Notes</th>
+                    <th>Date Added</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for c in cases %}
+                <tr>
+                    <td><a href="{{ url_for('citizen_detail', citizen_id=c.citizen.id) }}">{{ c.citizen.fullname }}</a></td>
+                    <td>{{ c.title }}</td>
+                    <td>{{ c.article or '—' }}</td>
+                    <td>{{ c.notes or '—' }}</td>
+                    <td>{{ c.date_added }}</td>
+                    <td>
+                        <div class="action-buttons">
+                            <a class="btn btn-sm btn-ghost" href="{{ url_for('citizen_detail', citizen_id=c.citizen.id) }}">View</a>
+                            <form method="POST" action="{{ url_for('delete_case', case_id=c.id) }}" style="display:inline;" onsubmit="return confirm('Delete this case?');">
+                                <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <i class="bi bi-folder-minus"></i>
+        <h4 class="mt-3">No assigned cases yet</h4>
+        <p>Use the Add Case button above to assign a case to a citizen.</p>
+    </div>
+    {% endif %}
+</div>
+
+{% endblock %}

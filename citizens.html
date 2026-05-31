@@ -1,0 +1,381 @@
+﻿{% extends "base.html" %}
+{% block title %}Citizens{% endblock %}
+
+{% block content %}
+<style>
+    .page-header {
+        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 16px;
+        margin-bottom: 2rem;
+        box-shadow: 0 8px 24px rgba(30, 60, 114, 0.2);
+        transition: background 0.3s ease;
+    }
+
+    body.dark-mode .page-header {
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+    }
+    
+    .stats-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+    
+    .stat-card {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        transition: transform 0.2s, background 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    body.dark-mode .stat-card {
+        background: #1e1e1e;
+        color: #e0e0e0;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+    }
+
+    body.dark-mode .stat-card:hover {
+        box-shadow: 0 6px 20px rgba(0,0,0,0.6);
+    }
+    
+    .stat-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        color: white;
+    }
+    
+    .stat-info h3 {
+        font-size: 1.8rem;
+        margin: 0;
+        font-weight: 700;
+        color: #2c3e50;
+        transition: color 0.3s ease;
+    }
+
+    body.dark-mode .stat-info h3 {
+        color: #e0e0e0;
+    }
+    
+    .stat-info p {
+        margin: 0;
+        color: #7f8c8d;
+        font-size: 0.9rem;
+        transition: color 0.3s ease;
+    }
+
+    body.dark-mode .stat-info p {
+        color: #999;
+    }
+    
+    .citizens-card {
+        background: white;
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.05);
+        transition: background 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    body.dark-mode .citizens-card {
+        background: #1e1e1e;
+        color: #e0e0e0;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+    }
+    
+    .table-container {
+        overflow-x: auto;
+    }
+    
+    .citizens-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+    
+    .citizens-table thead th {
+        background: #f8f9fa;
+        padding: 1rem;
+        text-align: left;
+        font-weight: 600;
+        color: #2c3e50;
+        border-bottom: 2px solid #e9ecef;
+        white-space: nowrap;
+    }
+    
+    .citizens-table tbody tr {
+        transition: background 0.2s;
+    }
+    
+    .citizens-table tbody tr:hover {
+        background: #f8f9fa;
+    }
+    
+    .citizens-table tbody td {
+        padding: 1rem;
+        border-bottom: 1px solid #e9ecef;
+        vertical-align: middle;
+        color: #495057;
+    }
+    
+    .citizen-name {
+        font-weight: 600;
+        color: #2c3e50;
+    }
+    
+    .badge-custom {
+        padding: 4px 10px;
+        border-radius: 6px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        display: inline-block;
+    }
+    
+    .badge-male {
+        background: #e3f2fd;
+        color: #1976d2;
+    }
+    
+    .badge-female {
+        background: #fce4ec;
+        color: #c2185b;
+    }
+    
+    .badge-senior {
+        background: #f3e5f5;
+        color: #7b1fa2;
+    }
+    
+    .badge-pwd {
+        background: #e8f5e9;
+        color: #388e3c;
+    }
+    
+    .badge-4ps {
+        background: #fff3e0;
+        color: #f57c00;
+    }
+    
+    .action-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+    
+    .btn-action {
+        padding: 6px 12px;
+        border: none;
+        border-radius: 6px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-align: center;
+        text-decoration: none;
+    }
+    
+    .btn-view {
+        background: #00bcd4;
+        color: white;
+    }
+    .btn-view:hover {
+        background: #00acc1;
+    }
+    
+    .btn-delete {
+        background: #f44336;
+        color: white;
+    }
+    .btn-delete:hover {
+        background: #d32f2f;
+    }
+    
+    .btn-add {
+        background: #4caf50;
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 10px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+        transition: all 0.2s;
+    }
+    .btn-add:hover {
+        background: #45a049;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(76, 175, 80, 0.4);
+        color: white;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+        color: #7f8c8d;
+    }
+    
+    .empty-state i {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        opacity: 0.3;
+    }
+</style>
+
+<!-- Header -->
+<div class="page-header">
+    <div class="row align-items-center">
+        <div class="col">
+            <h2 class="fw-bold mb-2">👥 Citizens Directory</h2>
+            <p class="mb-0 opacity-75">Manage and view all registered citizens in Barangay Taft</p>
+        </div>
+        <div class="col-auto">
+            {% if session.role == 'admin' %}
+            <a href="/add_citizen" class="btn-add">
+                <i class="bi bi-person-plus-fill"></i>
+                <span>Add Citizen</span>
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Stats Cards -->
+<div class="stats-row">
+    <div class="stat-card">
+        <div class="stat-icon" style="background: linear-gradient(135deg, #3498db, #2980b9);">
+            👥
+        </div>
+        <div class="stat-info">
+            <h3>{{ citizens|length }}</h3>
+            <p>Total Citizens</p>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon" style="background: linear-gradient(135deg, #2ecc71, #27ae60);">
+            👨
+        </div>
+        <div class="stat-info">
+            <h3>{{ citizens|selectattr('gender', 'equalto', 'Male')|list|length }}</h3>
+            <p>Male</p>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon" style="background: linear-gradient(135deg, #e74c3c, #c0392b);">
+            👩
+        </div>
+        <div class="stat-info">
+            <h3>{{ citizens|selectattr('gender', 'equalto', 'Female')|list|length }}</h3>
+            <p>Female</p>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon" style="background: linear-gradient(135deg, #f39c12, #e67e22);">
+            🧓
+        </div>
+        <div class="stat-info">
+            <h3>{{ citizens|selectattr('age', '>=', 60)|list|length }}</h3>
+            <p>Seniors</p>
+        </div>
+    </div>
+</div>
+
+<!-- Citizens Table -->
+<div class="citizens-card">
+    <div class="table-container">
+        {% if citizens %}
+        <table class="citizens-table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Gender</th>
+                    <th>Age</th>
+                    <th>Category</th>
+                    <th>Occupation</th>
+                    <th>Special Status</th>
+                    <th>Purok</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for citizen in citizens %}
+                <tr>
+                    <td>
+                        <div class="citizen-name">{{ citizen.fullname }}</div>
+                    </td>
+                    <td>
+                        {% if citizen.gender == 'Male' %}
+                            <span class="badge-custom badge-male">👨 Male</span>
+                        {% else %}
+                            <span class="badge-custom badge-female">👩 Female</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ citizen.age }}</td>
+                    <td>{{ citizen.age_category }}</td>
+                    <td>{{ citizen.occupation or 'N/A' }}</td>
+                    <td>
+                        {% if 'Senior' in citizen.special_status %}
+                            <span class="badge-custom badge-senior">🧓 Senior</span>
+                        {% elif 'PWD' in citizen.special_status %}
+                            <span class="badge-custom badge-pwd">♿ PWD</span>
+                        {% elif '4Ps' in citizen.special_status %}
+                            <span class="badge-custom badge-4ps">💳 4Ps</span>
+                        {% else %}
+                            <span class="text-muted">None</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ citizen.purok }}</td>
+                    <td>
+                        <div class="action-buttons">
+                            <a href="/citizen/{{ citizen.id }}" class="btn-action btn-view">
+                                <i class="bi bi-eye"></i> View
+                            </a>
+                            {% if session.role == 'admin' %}
+                            <a href="/edit_citizen/{{ citizen.id }}" class="btn-action btn-view" style="background:#6c757d;">
+                                <i class="bi bi-pencil"></i> Edit
+                            </a>
+                            <a href="/delete_citizen/{{ citizen.id }}" 
+                               class="btn-action btn-delete"
+                               onclick="return confirm('Are you sure you want to delete {{ citizen.fullname }}?')">
+                                <i class="bi bi-trash"></i> Delete
+                            </a>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="empty-state">
+            <i class="bi bi-people"></i>
+            <h4>No Citizens Found</h4>
+            <p>Start by adding your first citizen record.</p>
+            {% if session.role == 'admin' %}
+            <a href="/add_citizen" class="btn-add mt-3">
+                <i class="bi bi-person-plus-fill"></i> Add Citizen
+            </a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

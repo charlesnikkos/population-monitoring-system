@@ -1,0 +1,507 @@
+{% extends "base.html" %}
+{% block title %}Request Management{% endblock %}
+
+{% block content %}
+<style>
+    .page-header {
+        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 16px;
+        margin-bottom: 2rem;
+        box-shadow: 0 8px 24px rgba(30, 60, 114, 0.2);
+        transition: background 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    body.dark-mode .page-header {
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+    }
+
+    .requests-card {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.05);
+        transition: background 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    body.dark-mode .requests-card {
+        background: #1e1e1e;
+        color: #e0e0e0;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+    }
+
+    .requests-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    .requests-table thead th {
+        background: #f8f9fa;
+        padding: 1rem;
+        text-align: left;
+        font-weight: 600;
+        color: #2c3e50;
+        border-bottom: 2px solid #e9ecef;
+        white-space: nowrap;
+        transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+    }
+
+    body.dark-mode .requests-table thead th {
+        background: #2c3e50;
+        color: #e0e0e0;
+        border-bottom-color: #444;
+    }
+
+    .requests-table tbody tr {
+        transition: background 0.2s;
+    }
+
+    .requests-table tbody tr:hover {
+        background: #f8f9fa;
+    }
+
+    body.dark-mode .requests-table tbody tr:hover {
+        background: #2c3e50;
+    }
+
+    .requests-table tbody td {
+        padding: 1rem;
+        border-bottom: 1px solid #e9ecef;
+        vertical-align: middle;
+        color: #495057;
+        transition: color 0.3s ease, border-color 0.3s ease;
+    }
+
+    body.dark-mode .requests-table tbody td {
+        color: #e0e0e0;
+        border-bottom-color: #333;
+    }
+
+    .request-link {
+        color: #2c3e50;
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+    body.dark-mode .request-link {
+        color: #8b9bef;
+    }
+
+    .badge-status {
+        padding: 6px 12px;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        display: inline-block;
+    }
+
+    .badge-pending {
+        background: #fff3cd;
+        color: #856404;
+    }
+
+    .badge-approved {
+        background: #d4edda;
+        color: #155724;
+    }
+
+    .badge-released {
+        background: #cfe2ff;
+        color: #084298;
+    }
+
+    .badge-rejected {
+        background: #f8d7da;
+        color: #721c24;
+    }
+
+    body.dark-mode .badge-pending {
+        background: #5c4c16;
+        color: #fff8c5;
+    }
+
+    body.dark-mode .badge-approved {
+        background: #1f4620;
+        color: #c7f0cb;
+    }
+
+    body.dark-mode .badge-released {
+        background: #1f3c65;
+        color: #d3e7ff;
+    }
+
+    body.dark-mode .badge-rejected {
+        background: #5a1b23;
+        color: #ffcccf;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+    }
+
+    .btn-action-sm {
+        padding: 6px 12px;
+        font-size: 0.85rem;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 500;
+        transition: all 0.2s;
+    }
+
+    .btn-approve {
+        background: #28a745;
+        color: white;
+    }
+
+    .btn-approve:hover {
+        background: #218838;
+    }
+
+    .btn-release {
+        background: #007bff;
+        color: white;
+    }
+
+    .btn-release:hover {
+        background: #0056b3;
+    }
+
+    .btn-reject {
+        background: #dc3545;
+        color: white;
+    }
+
+    .btn-reject:hover {
+        background: #c82333;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+        color: #7f8c8d;
+    }
+
+    .empty-state i {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        opacity: 0.3;
+    }
+
+    .card-container {
+        background: white;
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.05);
+    }
+
+    .stats-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .stat-card {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        text-align: center;
+        min-height: 130px;
+        display: grid;
+        place-items: center;
+        gap: 0.75rem;
+    }
+
+    body.dark-mode .stat-card {
+        background: #1e1e1e;
+        color: #e0e0e0;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.35);
+    }
+
+    .stat-card .stat-icon {
+        width: 48px;
+        height: 48px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 12px;
+        background: #eaf4ff;
+        color: #1e3c72;
+        font-size: 1.3rem;
+    }
+
+    body.dark-mode .stat-card .stat-icon {
+        background: #2c3e50;
+        color: #e0e0e0;
+    }
+
+    .page-header-icon {
+        width: 62px;
+        height: 62px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 18px;
+        background: rgba(255,255,255,0.15);
+        color: white;
+        font-size: 1.65rem;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    }
+
+    .page-header-icon i {
+        transform: translateY(1px);
+    }
+
+    body.dark-mode .page-header-icon {
+        background: rgba(255,255,255,0.08);
+        box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+        color: white;
+    }
+
+    .stat-card h3 {
+        font-size: 1.8rem;
+        margin: 0;
+        font-weight: 700;
+        color: #2c3e50;
+    }
+
+    .stat-card p {
+        margin: 0;
+        color: #7f8c8d;
+        font-size: 0.95rem;
+    }
+
+    body.dark-mode .card-container {
+        background: #1e1e1e;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.45);
+    }
+
+    body.dark-mode .empty-state {
+        color: #999;
+    }
+
+    body.dark-mode .empty-state i {
+        color: #666;
+    }
+
+    body.dark-mode #releaseModal {
+        background: rgba(0,0,0,0.65);
+    }
+
+    body.dark-mode #releaseModal > div {
+        background: #1e1e1e;
+        color: #e0e0e0;
+        border: 1px solid #333;
+    }
+
+    body.dark-mode #releaseModal label {
+        color: #e0e0e0;
+    }
+
+    .release-modal-content {
+        background: white;
+    }
+
+    .release-modal-text {
+        color: #6c757d;
+    }
+
+    body.dark-mode #releaseModal {
+        background: rgba(0,0,0,0.65);
+    }
+
+    body.dark-mode .release-modal-content {
+        background: #1e1e1e;
+        color: #e0e0e0;
+    }
+
+    body.dark-mode .release-modal-text {
+        color: #c0c0c0;
+    }
+
+    body.dark-mode #releaseModal .btn-secondary {
+        background: #3a4b68;
+        border-color: #444;
+        color: #e0e0e0;
+    }
+
+    body.dark-mode #releaseModal .btn-primary {
+        background: #667eea;
+        border-color: #667eea;
+        color: white;
+    }
+</style>
+
+<!-- Header -->
+<div class="page-header">
+    <div class="row align-items-center">
+        <div class="col">
+            <div class="d-flex align-items-center gap-3 mb-2">
+                <span class="page-header-icon">
+                    <i class="bi bi-file-earmark-check-2"></i>
+                </span>
+                <div>
+                    <h2 class="fw-bold mb-0">Request Management</h2>
+                    <p class="mb-0 opacity-75">View and manage all citizen requests</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-auto">
+            <a href="/certificates" class="btn btn-light">
+                <i class="bi bi-arrow-left"></i> Back to Center
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Stats -->
+<div class="stats-row">
+    <div class="stat-card">
+        <div class="stat-icon"><i class="bi bi-journal-check"></i></div>
+        <h3>{{ total_requests }}</h3>
+        <p>Total Requests</p>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon"><i class="bi bi-hourglass-split"></i></div>
+        <h3>{{ pending_count }}</h3>
+        <p>Pending</p>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon"><i class="bi bi-check-circle"></i></div>
+        <h3>{{ approved_count }}</h3>
+        <p>Approved</p>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon"><i class="bi bi-box-arrow-up-right"></i></div>
+        <h3>{{ released_count }}</h3>
+        <p>Released</p>
+    </div>
+</div>
+
+<!-- Requests Table -->
+<div class="card-container">
+    {% if requests %}
+    <div style="overflow-x: auto;">
+        <table class="requests-table">
+            <thead>
+                <tr>
+                    <th>Citizen Name</th>
+                    <th>Certificate Type</th>
+                    <th>Purpose</th>
+                    <th>Status</th>
+                    <th>Date Requested</th>
+                    <th>Date Released</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for req in requests %}
+                <tr>
+                    <td>
+                        <a href="/citizen/{{ req.citizen.id }}" class="request-link">
+                            {{ req.citizen.fullname }}
+                        </a>
+                    </td>
+                    <td>{{ req.request_type }}</td>
+                    <td>
+                        <small>{{ req.notes }}</small>
+                    </td>
+                    <td>
+                        <span class="badge-status badge-{{ req.status.lower() }}">
+                            {{ req.status }}
+                        </span>
+                    </td>
+                    <td>{{ req.date_requested }}</td>
+                    <td>{{ req.date_released or '-' }}</td>
+                    <td>
+                        <div class="action-buttons">
+                            {% if req.model in ['certificate','clearance','indigency','ayuda'] %}
+                                {% if req.status == 'Pending' %}
+                                <form method="POST" action="{{ req.approve_url }}" style="display: inline;">
+                                    <button type="submit" class="btn-action-sm btn-approve" onclick="return confirm('Approve this request?')">
+                                        <i class="bi bi-check-circle"></i> Approve
+                                    </button>
+                                </form>
+                                <form method="POST" action="{{ req.reject_url }}" style="display: inline;">
+                                    <button type="submit" class="btn-action-sm btn-reject" onclick="return confirm('Reject this request?')">
+                                        <i class="bi bi-x-circle"></i> Reject
+                                    </button>
+                                </form>
+                                {% endif %}
+
+                                {% if req.status == 'Approved' %}
+                                <button type="button" class="btn-action-sm btn-release" onclick="showReleaseModal('{{ req.release_url }}', '{{ req.citizen.fullname }}')">
+                                    <i class="bi bi-hand-thumbs-up"></i> Release
+                                </button>
+                                {% endif %}
+
+                                {% if req.status != 'Released' and req.status != 'Rejected' %}
+                                <form method="POST" action="{{ req.reject_url }}" style="display:inline;">
+                                    <button type="submit" class="btn-action-sm btn-reject" onclick="return confirm('Cancel this request?')">
+                                        <i class="bi bi-trash"></i> Cancel
+                                    </button>
+                                </form>
+                                {% endif %}
+                            {% else %}
+                                <a href="{{ req.manage_url }}" class="btn-action-sm btn-release">
+                                    <i class="bi bi-gear"></i> Manage
+                                </a>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <i class="bi bi-inbox"></i>
+        <h4>No Certificate Requests Yet</h4>
+        <p>All certificate requests will appear here.</p>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Release Modal -->
+<div id="releaseModal" class="release-modal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center;">
+    <div class="release-modal-content" style="padding: 2rem; border-radius: 12px; max-width: 400px; width: 90%;">
+        <h5>Release Certificate</h5>
+        <p id="releaseText" class="release-modal-text" style="margin: 1rem 0;"></p>
+        <form id="releaseForm" method="POST" style="margin-top: 1.5rem;">
+            <label class="form-label">Date Released</label>
+            <input type="date" name="date_released" class="form-control" required>
+            <div style="display: flex; gap: 10px; margin-top: 1.5rem; justify-content: flex-end;">
+                <button type="button" class="btn btn-secondary" onclick="closeReleaseModal()">Cancel</button>
+                <button type="submit" class="btn btn-primary">Release</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function showReleaseModal(reqId, citizenName) {
+    document.getElementById('releaseText').textContent = `Release request for ${citizenName}?`;
+    document.getElementById('releaseForm').action = reqId; // here reqId is actually the URL when called for non-certificate
+    document.getElementById('releaseModal').style.display = 'flex';
+}
+
+function closeReleaseModal() {
+    document.getElementById('releaseModal').style.display = 'none';
+}
+
+function showRejectModal(reqId) {
+    if (confirm('Cancel this certificate request?')) {
+        fetch(`/certificate_request/${reqId}/reject`, { method: 'POST' })
+            .then(() => location.reload());
+    }
+}
+</script>
+{% endblock %}

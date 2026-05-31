@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ citizen.fullname }} - Citizen Card</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --primary: #667eea;
+            --secondary: #764ba2;
+            --bg-light: #f8f9fa;
+            --text-light: #2d3748;
+            --bg-dark: #121212;
+            --text-dark: #e0e0e0;
+            --card-bg-dark: #1e1e1e;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            transition: background 0.5s ease;
+        }
+
+        body.dark-mode {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        }
+
+        .card-container {
+            width: 100%;
+            max-width: 450px;
+            position: relative;
+        }
+
+        .dark-mode-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 10px 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.2rem;
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        .dark-mode-toggle:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+
+        .citizen-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            transform: translateY(0);
+            transition: all 0.3s ease;
+        }
+
+        body.dark-mode .citizen-card {
+            background: var(--card-bg-dark);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7);
+        }
+
+        .citizen-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 25px 70px rgba(0, 0, 0, 0.35);
+        }
+
+        body.dark-mode .citizen-card:hover {
+            box-shadow: 0 25px 70px rgba(0, 0, 0, 0.8);
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            padding: 25px 20px;
+            text-align: center;
+            border-bottom: 3px solid var(--primary);
+        }
+
+        .card-header h5 {
+            font-size: 0.9rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+
+        .card-header p {
+            font-size: 0.85rem;
+            opacity: 0.9;
+            margin: 0;
+        }
+
+        .photo-section {
+            text-align: center;
+            padding: 30px 20px 20px;
+            background: #f8f9fa;
+            border-bottom: 2px solid #e9ecef;
+            transition: background 0.3s ease;
+        }
+
+        body.dark-mode .photo-section {
+            background: #2c3e50;
+            border-bottom-color: #444;
+        }
+
+        .citizen-photo {
+            width: 140px;
+            height: 140px;
+            border-radius: 12px;
+            object-fit: cover;
+            border: 4px solid var(--primary);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.2);
+            margin: 0 auto;
+            display: block;
+        }
+
+        .photo-placeholder {
+            width: 140px;
+            height: 140px;
+            border-radius: 12px;
+            background: #e9ecef;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            color: #adb5bd;
+            border: 4px solid var(--primary);
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        body.dark-mode .photo-placeholder {
+            background: #333;
+            color: #666;
+        }
+
+        .name-section {
+            padding: 20px;
+            text-align: center;
+            border-bottom: 2px solid #e9ecef;
+            transition: border-color 0.3s ease;
+        }
+
+        body.dark-mode .name-section {
+            border-bottom-color: #444;
+        }
+
+        .name-section h2 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: color 0.3s ease;
+        }
+
+        body.dark-mode .name-section h2 {
+            color: #e0e0e0;
+        }
+
+        .age-category {
+            display: inline-block;
+            background: var(--primary);
+            color: white;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-top: 8px;
+        }
+
+        .details-section {
+            padding: 25px 20px;
+        }
+
+        .detail-row {
+            display: flex;
+            margin-bottom: 18px;
+            align-items: flex-start;
+        }
+
+        .detail-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .detail-icon {
+            width: 35px;
+            height: 35px;
+            background: #f0f4ff;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+            margin-right: 15px;
+            flex-shrink: 0;
+            font-size: 1.1rem;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        body.dark-mode .detail-icon {
+            background: #333;
+            color: #667eea;
+        }
+
+        .detail-content {
+            flex: 1;
+        }
+
+        .detail-label {
+            font-size: 0.8rem;
+            color: #718096;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 3px;
+            transition: color 0.3s ease;
+        }
+
+        body.dark-mode .detail-label {
+            color: #999;
+        }
+
+        .detail-value {
+            font-size: 1rem;
+            color: #2d3748;
+            font-weight: 500;
+            word-break: break-word;
+            transition: color 0.3s ease;
+        }
+
+        body.dark-mode .detail-value {
+            color: #e0e0e0;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .status-married {
+            background-color: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-single {
+            background-color: #dbeafe;
+            color: #0c4a6e;
+        }
+
+        .status-widowed {
+            background-color: #f3f4f6;
+            color: #374151;
+        }
+
+        .status-separated {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+
+        body.dark-mode .status-married {
+            background-color: #704214;
+            color: #ffd699;
+        }
+
+        body.dark-mode .status-single {
+            background-color: #0c3d66;
+            color: #a8d8ff;
+        }
+
+        body.dark-mode .status-widowed {
+            background-color: #333;
+            color: #ccc;
+        }
+
+        body.dark-mode .status-separated {
+            background-color: #660000;
+            color: #ff9999;
+        }
+
+        .footer-section {
+            background: #f8f9fa;
+            padding: 15px 20px;
+            border-top: 2px solid #e9ecef;
+            text-align: center;
+            font-size: 0.8rem;
+            color: #718096;
+            transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+        }
+
+        body.dark-mode .footer-section {
+            background: #2c3e50;
+            border-top-color: #444;
+            color: #999;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-top: 2px solid #e9ecef;
+            transition: background 0.3s ease, border-color 0.3s ease;
+        }
+
+        body.dark-mode .action-buttons {
+            background: #2c3e50;
+            border-top-color: #444;
+        }
+
+        .btn-small {
+            flex: 1;
+            padding: 10px;
+            font-size: 0.85rem;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-back {
+            background: #e9ecef;
+            color: #2d3748;
+        }
+
+        body.dark-mode .btn-back {
+            background: #444;
+            color: #e0e0e0;
+        }
+
+        .btn-back:hover {
+            background: #dee2e6;
+            color: #1a202c;
+        }
+
+        body.dark-mode .btn-back:hover {
+            background: #555;
+            color: #fff;
+        }
+
+        @media print {
+            body {
+                background: white;
+            }
+            .action-buttons {
+                display: none;
+            }
+            .dark-mode-toggle {
+                display: none;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .citizen-card {
+                border-radius: 10px;
+            }
+
+            .name-section h2 {
+                font-size: 1.5rem;
+            }
+
+            .detail-row {
+                margin-bottom: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button class="dark-mode-toggle" id="darkModeToggle" title="Toggle Dark Mode">
+        <i class="bi bi-moon"></i>
+    </button>
+    <div class="card-container">
+        <div class="citizen-card">
+            <!-- Header -->
+            <div class="card-header">
+                <h5><i class="bi bi-person-vcard"></i> Citizen Card</h5>
+                <p>Barangay Resident Information</p>
+            </div>
+
+            <!-- Photo Section -->
+            <div class="photo-section">
+                {% if citizen.photo and citizen.photo != 'default.png' %}
+                    <img src="{{ url_for('static', filename='uploads/' + citizen.photo) }}" alt="{{ citizen.fullname }}" class="citizen-photo">
+                {% else %}
+                    <div class="photo-placeholder">
+                        <i class="bi bi-person-fill"></i>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Name Section -->
+            <div class="name-section">
+                <h2>{{ citizen.fullname }}</h2>
+                <span class="age-category">{{ citizen.age_category }} • Age {{ citizen.age }}</span>
+            </div>
+
+            <!-- Details Section -->
+            <div class="details-section">
+                <!-- Age and Gender -->
+                <div class="detail-row">
+                    <div class="detail-icon">
+                        <i class="bi bi-calendar-event"></i>
+                    </div>
+                    <div class="detail-content">
+                        <div class="detail-label">Date of Birth</div>
+                        <div class="detail-value">{{ citizen.birthdate }}</div>
+                    </div>
+                </div>
+
+                <!-- Gender -->
+                <div class="detail-row">
+                    <div class="detail-icon">
+                        <i class="bi bi-person"></i>
+                    </div>
+                    <div class="detail-content">
+                        <div class="detail-label">Gender</div>
+                        <div class="detail-value">{{ citizen.gender }}</div>
+                    </div>
+                </div>
+
+                <!-- Civil Status -->
+                <div class="detail-row">
+                    <div class="detail-icon">
+                        <i class="bi bi-heart"></i>
+                    </div>
+                    <div class="detail-content">
+                        <div class="detail-label">Civil Status</div>
+                        <div class="detail-value">
+                            <span class="status-badge status-{{ citizen.status.lower().replace(' ', '-') }}">
+                                {{ citizen.status }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Occupation -->
+                <div class="detail-row">
+                    <div class="detail-icon">
+                        <i class="bi bi-briefcase"></i>
+                    </div>
+                    <div class="detail-content">
+                        <div class="detail-label">Occupation</div>
+                        <div class="detail-value">{{ citizen.occupation if citizen.occupation != 'N/A' else 'Not specified' }}</div>
+                    </div>
+                </div>
+
+                <!-- Address -->
+                <div class="detail-row">
+                    <div class="detail-icon">
+                        <i class="bi bi-geo-alt"></i>
+                    </div>
+                    <div class="detail-content">
+                        <div class="detail-label">Address</div>
+                        <div class="detail-value">{{ citizen.address }}</div>
+                    </div>
+                </div>
+
+                <!-- Place of Birth -->
+                <div class="detail-row">
+                    <div class="detail-icon">
+                        <i class="bi bi-compass"></i>
+                    </div>
+                    <div class="detail-content">
+                        <div class="detail-label">Place of Birth</div>
+                        <div class="detail-value">{{ citizen.place_of_birth }}</div>
+                    </div>
+                </div>
+
+                <!-- Nationality -->
+                <div class="detail-row">
+                    <div class="detail-icon">
+                        <i class="bi bi-globe"></i>
+                    </div>
+                    <div class="detail-content">
+                        <div class="detail-label">Nationality</div>
+                        <div class="detail-value">{{ citizen.nationality }}</div>
+                    </div>
+                </div>
+
+                <!-- Email -->
+                <div class="detail-row">
+                    <div class="detail-icon">
+                        <i class="bi bi-envelope"></i>
+                    </div>
+                    <div class="detail-content">
+                        <div class="detail-label">Email</div>
+                        <div class="detail-value">{{ citizen.email or 'N/A' }}</div>
+                    </div>
+                </div>
+
+                <!-- Contact Number -->
+                <div class="detail-row">
+                    <div class="detail-icon">
+                        <i class="bi bi-telephone"></i>
+                    </div>
+                    <div class="detail-content">
+                        <div class="detail-label">Contact Number</div>
+                        <div class="detail-value">{{ citizen.contact_number }}</div>
+                    </div>
+                </div>
+
+                <!-- Purok -->
+                <div class="detail-row">
+                    <div class="detail-icon">
+                        <i class="bi bi-map"></i>
+                    </div>
+                    <div class="detail-content">
+                        <div class="detail-label">Purok</div>
+                        <div class="detail-value">{{ citizen.purok }}</div>
+                    </div>
+                </div>
+
+                <!-- Special Status -->
+                {% if citizen.special_status != 'None' %}
+                <div class="detail-row">
+                    <div class="detail-icon">
+                        <i class="bi bi-star"></i>
+                    </div>
+                    <div class="detail-content">
+                        <div class="detail-label">Special Status</div>
+                        <div class="detail-value">{{ citizen.special_status }}</div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Footer -->
+            <div class="footer-section">
+                <small>This is an official record of the Barangay Citizen Information System</small>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <button class="btn-small btn-back" onclick="window.history.back()">
+                    <i class="bi bi-arrow-left"></i> Back
+                </button>
+                <button class="btn-small" style="background: #667eea; color: white;" onclick="downloadCardAsPNG()">
+                    <i class="bi bi-image"></i> Download Card
+                </button>
+                <button class="btn-small" style="background: #2d3748; color: white;" onclick="window.print()">
+                    <i class="bi bi-printer"></i> Print
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script>
+        // Dark Mode Toggle
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        
+        function initDarkMode() {
+            if (localStorage.getItem('theme') === 'dark') {
+                document.body.classList.add('dark-mode');
+                darkModeToggle.querySelector('i').classList.replace('bi-moon', 'bi-sun');
+            }
+        }
+
+        darkModeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+            const icon = darkModeToggle.querySelector('i');
+            if (document.body.classList.contains('dark-mode')) {
+                icon.classList.replace('bi-moon', 'bi-sun');
+                localStorage.setItem('theme', 'dark');
+            } else {
+                icon.classList.replace('bi-sun', 'bi-moon');
+                localStorage.setItem('theme', 'light');
+            }
+        });
+
+        // Initialize dark mode on page load
+        initDarkMode();
+
+        async function downloadCardAsPNG() {
+            const cardElement = document.querySelector('.citizen-card');
+            const fileName = '{{ citizen.fullname }}_Citizen_Card';
+            
+            try {
+                const canvas = await html2canvas(cardElement, {
+                    scale: 2,
+                    allowTaint: true,
+                    useCORS: true,
+                    backgroundColor: document.body.classList.contains('dark-mode') ? '#1e1e1e' : '#ffffff'
+                });
+                
+                const link = document.createElement('a');
+                link.href = canvas.toDataURL('image/png');
+                link.download = fileName + '.png';
+                link.click();
+            } catch (error) {
+                alert('Error downloading card: ' + error.message);
+                console.error('Download error:', error);
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+
+{% block title %}Add Lupon Case{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-body">
+        <h4>Add Case to Citizen</h4>
+        <form method="post">
+            <div class="mb-3">
+                <label class="form-label">Citizen</label>
+                <!-- Searchable citizen input: user types name and a hidden input carries the ID -->
+                <input list="citizensList" id="citizen_search" class="form-control" placeholder="Type name or purok" autocomplete="off">
+                <input type="hidden" name="citizen_id" id="citizen_id" required>
+                <datalist id="citizensList">
+                    {% for c in citizens %}
+                    <option value="{{ c.id }}|{{ c.fullname }} — {{ c.purok }}"></option>
+                    {% endfor %}
+                </datalist>
+                <small class="form-text text-muted">Start typing to search, or paste the citizen ID followed by | to select quickly.</small>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Case Title</label>
+                <input type="text" name="title" class="form-control" list="masterCases">
+                <datalist id="masterCases">
+                    {% for m in master_cases %}
+                    <option value="{{ m }}"></option>
+                    {% endfor %}
+                </datalist>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Article (optional)</label>
+                <input type="text" name="article" class="form-control" placeholder="Art. ...">
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Notes (optional)</label>
+                <textarea name="notes" class="form-control"></textarea>
+            </div>
+            <button class="btn btn-primary" type="submit">Add Case</button>
+            <a class="btn btn-secondary" href="{{ url_for('cases') }}">Cancel</a>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// When user selects an option from datalist, the value is like "id|Fullname — Purok".
+// Parse the leading id and set the hidden input. Also try to match when user types full name.
+(function(){
+    const search = document.getElementById('citizen_search');
+    const hidden = document.getElementById('citizen_id');
+    const list = Array.from(document.getElementById('citizensList').options).map(o => o.value);
+
+    function setFromValue(val){
+        if(!val) { hidden.value = ''; return; }
+        // If value starts with digits and a pipe, use that id
+        const m = val.match(/^\s*(\d+)\|/);
+        if(m){ hidden.value = m[1]; return; }
+        // Otherwise try to find an option containing the typed text (case-insensitive)
+        const found = list.find(v => v.toLowerCase().includes(val.toLowerCase()));
+        if(found){
+            const id = found.split('|',1)[0];
+            hidden.value = id;
+            // normalize visible field to the friendly label
+            search.value = found.replace(/^\d+\|/,'');
+        } else {
+            hidden.value = '';
+        }
+    }
+
+    search.addEventListener('input', function(e){ setFromValue(e.target.value); });
+    // On form submit, ensure we have an id; otherwise prevent submit and show a message
+    const form = search.closest('form');
+    form.addEventListener('submit', function(e){
+        if(!hidden.value){
+            e.preventDefault();
+            alert('Please select a valid citizen from the list. Start typing and choose one.');
+        }
+    });
+})();
+</script>
+{% endblock %}

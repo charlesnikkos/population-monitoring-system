@@ -1,0 +1,142 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    .qr-card {
+        max-width: 420px;
+        margin: 1.5rem auto 1rem;
+        padding: 1.5rem;
+        border-radius: 20px;
+        background: var(--card-bg, #ffffff);
+        box-shadow: 0 12px 30px rgba(0,0,0,0.08);
+        text-align: center;
+    }
+    .qr-card h4 {
+        margin-bottom: 0.35rem;
+    }
+    .qr-card img {
+        width: min(100%, 320px);
+        height: auto;
+        display: block;
+        margin: 1rem auto;
+        padding: 1rem;
+        background: var(--card-inner-bg, #f8f9fa);
+        border-radius: 18px;
+        box-shadow: inset 0 0 0 1px rgba(0,0,0,0.05);
+    }
+    .qr-card .btn {
+        min-width: 140px;
+    }
+</style>
+<h2 class="mb-4">Citizen Details</h2>
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <div class="d-flex flex-column flex-md-row align-items-center gap-4 mb-4">
+            <img src="{{ url_for('static', filename='uploads/' ~ citizen.photo) if citizen.photo and citizen.photo != 'default.png' else url_for('static', filename='logo.png') }}" alt="Photo of {{ citizen.fullname }}" style="width: 180px; height: 180px; object-fit: cover; border-radius: 16px; border: 1px solid #e9ecef;">
+            <div>
+                <h4 class="mb-2">{{ citizen.fullname }}</h4>
+                <p class="mb-1"><strong>Purok:</strong> {{ citizen.purok }}</p>
+                <p class="mb-0"><strong>Special Status:</strong> {{ citizen.special_status }}</p>
+            </div>
+        </div>
+        <dl class="row">
+            <dt class="col-sm-3">Full Name</dt>
+            <dd class="col-sm-9">{{ citizen.fullname }}</dd>
+
+            <dt class="col-sm-3">Birthdate</dt>
+            <dd class="col-sm-9">{{ citizen.birthdate }}</dd>
+
+            <dt class="col-sm-3">Place of Birth</dt>
+            <dd class="col-sm-9">{{ citizen.place_of_birth }}</dd>
+
+            <dt class="col-sm-3">Nationality</dt>
+            <dd class="col-sm-9">{{ citizen.nationality }}</dd>
+
+            <dt class="col-sm-3">Email Address</dt>
+            <dd class="col-sm-9">{{ citizen.email or 'N/A' }}</dd>
+
+            <dt class="col-sm-3">Contact Number</dt>
+            <dd class="col-sm-9">{{ citizen.contact_number }}</dd>
+
+            <dt class="col-sm-3">Gender</dt>
+            <dd class="col-sm-9">{{ citizen.gender }}</dd>
+
+            <dt class="col-sm-3">Age</dt>
+            <dd class="col-sm-9">{{ citizen.age }}</dd>
+
+            <dt class="col-sm-3">Address</dt>
+            <dd class="col-sm-9">{{ citizen.address }}</dd>
+
+            <dt class="col-sm-3">Occupation</dt>
+            <dd class="col-sm-9">{{ citizen.occupation }}</dd>
+
+            <dt class="col-sm-3">Age Category</dt>
+            <dd class="col-sm-9">{{ citizen.age_category }}</dd>
+
+            <dt class="col-sm-3">Special Status</dt>
+            <dd class="col-sm-9">{{ citizen.special_status }}</dd>
+
+            <dt class="col-sm-3">Civil Status</dt>
+            <dd class="col-sm-9">{{ citizen.status }}</dd>
+
+            <dt class="col-sm-3">Purok</dt>
+            <dd class="col-sm-9">{{ citizen.purok }}</dd>
+        </dl>
+    </div>
+</div>
+{% if qr_code %}
+<div class="qr-card">
+    <div>
+        <h4>Citizen QR Code</h4>
+        <p class="text-muted">Scan this code for quick citizen details.</p>
+    </div>
+    <img src="data:image/png;base64,{{ qr_code }}" alt="QR code for {{ citizen.fullname }}">
+    <div class="mt-2">
+        <a class="btn btn-sm btn-outline-primary" href="{{ url_for('citizen_qr_image', citizen_id=citizen.id) }}" target="_blank">Open QR image</a>
+        <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('citizen_qr_image', citizen_id=citizen.id) }}" download>Download PNG</a>
+    </div>
+</div>
+{% else %}
+<div class="alert alert-info mt-4">
+    QR code generation is available when the <code>qrcode</code> Python package is installed.
+</div>
+{% endif %}
+    <div class="mt-3 d-flex gap-2">
+        {% if session.role == 'admin' %}
+        <a class="btn btn-primary" href="{{ url_for('edit_citizen', citizen_id=citizen.id) }}">Edit Citizen</a>
+        {% endif %}
+        <a class="btn btn-secondary" href="{{ url_for('citizens') }}">Back to Citizens</a>
+        <button class="btn btn-outline-info" onclick="downloadDetailsAsImage()">
+            <i class="bi bi-image"></i> Download Details (PNG)
+        </button>
+        <a class="btn btn-outline-primary" href="{{ url_for('citizen_qr_image', citizen_id=citizen.id) }}" download>Download QR</a>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script>
+        async function downloadDetailsAsImage() {
+            const detailsElement = document.querySelector('.card');
+            const citizenName = '{{ citizen.fullname }}';
+            const fileName = citizenName.replace(/\s+/g, '_') + '_Details';
+            const isDarkMode = document.body.classList.contains('dark-mode');
+            
+            try {
+                const canvas = await html2canvas(detailsElement, {
+                    scale: 2,
+                    allowTaint: true,
+                    useCORS: true,
+                    backgroundColor: isDarkMode ? '#1e1e1e' : '#ffffff',
+                    logging: false
+                });
+                
+                const link = document.createElement('a');
+                link.href = canvas.toDataURL('image/png');
+                link.download = fileName + '.png';
+                link.click();
+            } catch (error) {
+                alert('Error downloading details: ' + error.message);
+                console.error('Download error:', error);
+            }
+        }
+    </script>
+{% endblock %}
